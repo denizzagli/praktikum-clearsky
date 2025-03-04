@@ -1,0 +1,23 @@
+#result {
+    margin-top: 10px;
+}
+
+.custom-title {
+    font-size: 2.6rem;
+    font-weight: 600;
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 0.3rem;
+    text-transform: capitalize;
+    font-family: 'Roboto', sans-serif;
+}
+
+.custom-subtitle {
+    font-size: 1.3rem;
+    font-weight: 400;
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    letter-spacing: 0.5px;
+}
