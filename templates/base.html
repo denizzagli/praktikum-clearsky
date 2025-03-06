@@ -20,6 +20,18 @@
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        html, body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar -->
@@ -75,6 +87,30 @@
 
     {% endblock %}
 </div>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-4 mt-auto w-full relative">
+    <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-4 md:space-y-0 px-6">
+        <div class="w-full md:w-1/3">
+            <p class="text-sm font-semibold">Deniz Zagli</p>
+            <a href="mailto:ge74veb@mytum.de" class="text-blue-400 text-sm hover:underline">ge74veb@mytum.de</a>
+        </div>
+        <div class="w-full md:w-1/3 text-center">
+            <p class="text-sm text-gray-400">Advanced Practical Course - Run-Time Data Visualization for Business
+                Processes.</p>
+        </div>
+        <div class="w-full md:w-1/3 flex justify-center md:justify-end">
+            <a href="https://github.com/denizzagli" target="_blank"
+               class="text-white hover:text-gray-400 flex items-center">
+                <svg class="w-6 h-6 ml-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                          d="M12 2C6.477 2 2 6.484 2 12.016c0 4.423 2.865 8.176 6.839 9.506.5.092.682-.217.682-.483 0-.237-.008-.866-.013-1.7-2.782.605-3.369-1.34-3.369-1.34-.454-1.155-1.11-1.463-1.11-1.463-.906-.62.068-.608.068-.608 1.002.07 1.53 1.03 1.53 1.03.89 1.524 2.335 1.084 2.904.829.091-.646.348-1.084.635-1.334-2.22-.252-4.555-1.114-4.555-4.962 0-1.096.39-1.993 1.03-2.693-.103-.253-.447-1.27.098-2.645 0 0 .84-.269 2.75 1.026a9.532 9.532 0 0 1 2.5-.34c.849.004 1.703.115 2.5.34 1.909-1.295 2.747-1.026 2.747-1.026.547 1.375.203 2.392.1 2.645.64.7 1.03 1.597 1.03 2.693 0 3.86-2.337 4.707-4.564 4.955.357.308.678.917.678 1.85 0 1.334-.012 2.412-.012 2.738 0 .269.18.579.688.482A10.018 10.018 0 0 0 22 12.016C22 6.484 17.522 2 12 2z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+</footer>
+
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
