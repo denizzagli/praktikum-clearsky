@@ -3,6 +3,37 @@
 {% block title %}Contact - ClearSky{% endblock %}
 
 {% block content %}
-<h1>Contact</h1>
-<p>Contact page.</p>
+<h1 class="text-center text-blue-600 text-3xl font-bold">Contact Us</h1>
+<p class="text-center text-gray-600 text-lg italic">Feel free to reach out to us!</p>
+
+<div class="container mt-4">
+    <form action="/send-email" method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="mb-3">
+            <label for="name" class="form-label font-semibold text-gray-700">Your Name</label>
+            <input type="text" class="form-control border border-gray-300 rounded-lg p-2" id="name" name="name"
+                   required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label font-semibold text-gray-700">Your Email</label>
+            <input type="email" class="form-control border border-gray-300 rounded-lg p-2" id="email" name="email"
+                   required>
+        </div>
+        <div class="mb-3">
+            <label for="subject" class="form-label font-semibold text-gray-700">Subject</label>
+            <input type="text" class="form-control border border-gray-300 rounded-lg p-2" id="subject" name="subject"
+                   required>
+        </div>
+        <div class="mb-3">
+            <label for="message" class="form-label font-semibold text-gray-700">Your Message</label>
+            <textarea class="form-control border border-gray-300 rounded-lg p-2" id="message" name="message" rows="5"
+                      required></textarea>
+        </div>
+        <div class="text-end">
+            <button type="submit"
+                    class="btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Send
+                Message
+            </button>
+        </div>
+    </form>
+</div>
 {% endblock %}
