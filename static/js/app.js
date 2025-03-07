@@ -2,13 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const button = document.getElementById("fetch-location");
     const dropdown = document.getElementById("city-dropdown");
     const resultDiv = document.getElementById("result");
-    const startButton = document.getElementById("start-app");
-
-    if (startButton) {
-        startButton.addEventListener("click", () => {
-            window.location.href = "/app";
-        });
-    }
 
     if (button) {
         button.addEventListener("click", async () => {
@@ -49,3 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+function redirectToApp() {
+    window.location.href = '/app';
+}

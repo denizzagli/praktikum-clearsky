@@ -3,11 +3,15 @@
 {% block title %}Home - ClearSky{% endblock %}
 
 {% block content %}
-<h1 class="custom-title">ClearSky</h1>
-<h2 class="custom-subtitle">Real-Time Weather and Air Quality Visualization</h2>
+<!-- Title and Subtitle of the Home Page -->
+<h1 class="text-center text-blue-600 text-4xl font-bold">ClearSky</h1>
+<p class="text-center text-gray-500 italic text-xl mt-2">
+    Real-Time Weather and Air Quality Visualization
+</p>
 
-<div class="d-flex justify-content-center">
-    <button id="start-app" class="btn btn-primary btn-lg">Start</button>
+<!-- Start Button -->
+<div class="mt-6 text-center">
+    <button onclick="redirectToApp()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Start</button>
 </div>
 
 {% endblock %}
