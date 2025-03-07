@@ -17,10 +17,10 @@ async function fetchLocation() {
     console.log("Fetching location data for:", startingCity, "to", destinationCity);
 
     try {
-        let startResponse = await fetch(`/get-location?city=${startingCity}&location_type=source`);
+        let startResponse = await fetch(`/ports/13378/get-location?city=${startingCity}&location_type=source`);
         let startData = await startResponse.json();
 
-        let destResponse = await fetch(`/get-location?city=${destinationCity}&location_type=destination`);
+        let destResponse = await fetch(`/ports/13378/get-location?city=${destinationCity}&location_type=destination`);
         let destData = await destResponse.json();
 
         if (startData.error) {
