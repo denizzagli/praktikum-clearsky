@@ -1,7 +1,7 @@
 let startMap, destMap;
 
 function redirectToApp() {
-    window.location.href = '/app';
+    window.location.href = '/ports/13378/app';
 }
 
 async function fetchLocation() {
