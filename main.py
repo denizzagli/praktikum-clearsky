@@ -21,29 +21,28 @@ templates = Jinja2Templates(directory="templates")
 
 location_data = {"source": None, "destination": None}
 
-BASE_ENDPOINT = "/ports/13378"
 
-@app.get(BASE_ENDPOINT + "/")
+@app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 
-@app.get(BASE_ENDPOINT + "/about")
+@app.get("/about")
 async def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 
-@app.get(BASE_ENDPOINT + "/contact")
+@app.get("/contact")
 async def contact(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
 
 
-@app.get(BASE_ENDPOINT + "/app")
+@app.get("/app")
 async def contact(request: Request):
     return templates.TemplateResponse("app.html", {"request": request})
 
 
-@app.get(BASE_ENDPOINT + "/get-location")
+@app.get("/get-location")
 async def get_location(city: str, location_type: str):
     try:
         url = f"https://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={OPENWEATHER_API_KEY}"
@@ -74,7 +73,7 @@ async def get_location(city: str, location_type: str):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-@app.get(BASE_ENDPOINT + "/get-location-source")
+@app.get("/get-location-source")
 def get_location_source():
     if location_data["source"]:
         return location_data["source"]
@@ -82,7 +81,7 @@ def get_location_source():
         return JSONResponse({"error": "No source location found."}, status_code=404)
 
 
-@app.get(BASE_ENDPOINT + "/get-location-destination")
+@app.get("/get-location-destination")
 def get_location_destination():
     if location_data["destination"]:
         return location_data["destination"]
@@ -90,7 +89,7 @@ def get_location_destination():
         return JSONResponse({"error": "No destination location found."}, status_code=404)
 
 
-@app.get(BASE_ENDPOINT + "/weather")
+@app.get("/weather")
 async def get_weather(lat: float, lon: float):
     try:
         url = f"https://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={lat},{lon}"
@@ -116,7 +115,7 @@ async def get_weather(lat: float, lon: float):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-@app.get(BASE_ENDPOINT + "/air-quality")
+@app.get("/air-quality")
 async def get_air_quality(lat: float, lon: float):
     try:
         url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}"
