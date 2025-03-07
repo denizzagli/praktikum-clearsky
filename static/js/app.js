@@ -1,48 +1,85 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const button = document.getElementById("fetch-location");
-    const dropdown = document.getElementById("city-dropdown");
-    const resultDiv = document.getElementById("result");
-
-    if (button) {
-        button.addEventListener("click", async () => {
-            const city = dropdown.value;
-
-            try {
-                const response = await fetch(`/get-location?city=${encodeURIComponent(city)}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    resultDiv.style.display = "block";
-                    resultDiv.className = "alert alert-success";
-                    resultDiv.innerHTML = `
-                    <strong>${data.name}</strong> (${data.country})<br>
-                    Latitude: ${data.lat}, Longitude: ${data.lon}
-                `;
-
-                    let map = L.map('map').setView([data.lat, data.lon], 13);
-
-                    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-
-                    L.marker([data.lat, data.lon]).addTo(map)
-                        .bindPopup(`<b>${data.name}</b><br>Lat: ${data.lat}, Lon: ${data.lon}`)
-                        .openPopup();
-                } else {
-                    resultDiv.style.display = "block";
-                    resultDiv.className = "alert alert-danger";
-                    resultDiv.textContent = data.error || "An error occurred.";
-                }
-            } catch (error) {
-                resultDiv.style.display = "block";
-                resultDiv.className = "alert alert-danger";
-                resultDiv.textContent = "Failed to fetch location info.";
-            }
-        });
-    }
-});
+let startMap, destMap;
 
 function redirectToApp() {
     window.location.href = '/app';
+}
+
+async function fetchLocation() {
+    let startingCity = document.getElementById("starting-city").value;
+    let destinationCity = document.getElementById("destination-city").value;
+
+    if (startingCity === destinationCity) {
+        alert("Starting and Destination cities cannot be the same.");
+
+        return;
+    }
+
+    console.log("Fetching location data for:", startingCity, "to", destinationCity);
+
+    try {
+        let startResponse = await fetch(`/get-location?city=${startingCity}&location_type=source`);
+        let startData = await startResponse.json();
+
+        let destResponse = await fetch(`/get-location?city=${destinationCity}&location_type=destination`);
+        let destData = await destResponse.json();
+
+        if (startData.error) {
+            alert(`Error fetching starting city: ${startData.error}`);
+
+            return;
+        }
+
+        if (destData.error) {
+            alert(`Error fetching destination city: ${destData.error}`);
+
+            return;
+        }
+
+        console.log("Starting City Data:", startData);
+        console.log("Destination City Data:", destData);
+
+        displayMaps(startData, destData);
+    } catch (error) {
+        console.error("Error fetching location data:", error);
+
+        alert("Failed to fetch location data.");
+    }
+}
+
+function displayMaps(startData, destData) {
+    if (!document.getElementById("map-start") || !document.getElementById("map-dest")) {
+        console.error("Map container not found!");
+        return;
+    }
+
+    document.getElementById("start-title").style.display = "block";
+    document.getElementById("dest-title").style.display = "block";
+
+    if (!startMap) {
+        startMap = L.map('map-start').setView([startData.lat, startData.lon], 6);
+    } else {
+        startMap.setView([startData.lat, startData.lon], 6);
+    }
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(startMap);
+
+    L.marker([startData.lat, startData.lon]).addTo(startMap)
+        .bindPopup(`<b>Starting City:</b> ${startData.name}`)
+        .openPopup();
+
+    if (!destMap) {
+        destMap = L.map('map-dest').setView([destData.lat, destData.lon], 6);
+    } else {
+        destMap.setView([destData.lat, destData.lon], 6);
+    }
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(destMap);
+
+    L.marker([destData.lat, destData.lon]).addTo(destMap)
+        .bindPopup(`<b>Destination City:</b> ${destData.name}`)
+        .openPopup();
 }

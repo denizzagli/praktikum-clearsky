@@ -21,3 +21,16 @@
     font-style: italic;
     letter-spacing: 0.5px;
 }
+
+.btn-primary-custom {
+    background-color: #3b82f6; /* Tailwind bg-blue-500 */
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border-radius: 0.25rem; /* rounded */
+    transition: background-color 0.3s ease-in-out;
+}
+
+.btn-primary-custom:hover {
+    background-color: #1d4ed8; /* Tailwind hover:bg-blue-700 */
+}

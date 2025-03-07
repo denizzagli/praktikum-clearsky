@@ -19,6 +19,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
+location_data = {"source": None, "destination": None}
+
 
 @app.get("/")
 async def home(request: Request):
@@ -41,7 +43,7 @@ async def contact(request: Request):
 
 
 @app.get("/get-location")
-async def get_location(city: str):
+async def get_location(city: str, location_type: str):
     try:
         url = f"https://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={OPENWEATHER_API_KEY}"
         async with httpx.AsyncClient() as client:
@@ -50,6 +52,11 @@ async def get_location(city: str):
         data = response.json()
 
         if len(data) > 0:
+            if location_type == "source":
+                location_data["source"] = data
+            elif location_type == "destination":
+                location_data["destination"] = data
+
             return {
                 "name": data[0]["name"],
                 "lat": data[0]["lat"],
@@ -64,6 +71,22 @@ async def get_location(city: str):
         return JSONResponse({"error": f"HTTP error: {e.response.status_code}"}, status_code=e.response.status_code)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@app.get("/get-location-source")
+def get_location_source():
+    if location_data["source"]:
+        return location_data["source"]
+    else:
+        return JSONResponse({"error": "No source location found."}, status_code=404)
+
+
+@app.get("/get-location-destination")
+def get_location_destination():
+    if location_data["destination"]:
+        return location_data["destination"]
+    else:
+        return JSONResponse({"error": "No destination location found."}, status_code=404)
 
 
 @app.get("/weather")
@@ -122,5 +145,5 @@ async def get_air_quality(lat: float, lon: float):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-    # uvicorn.run(app, host="::1", port=13378)
+    # uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="::1", port=13378)
