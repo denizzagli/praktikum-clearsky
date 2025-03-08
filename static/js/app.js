@@ -1,7 +1,25 @@
 let startMap, destMap;
 
+fetch("/static/config.json")
+    .then(response => response.json())
+    .then(data => {
+        window.CONFIG = data;
+    });
+
+function redirectToHome() {
+    window.location.href = window.CONFIG.BASE_URL + '/';
+}
+
+function redirectToAbout() {
+    window.location.href = window.CONFIG.BASE_URL + '/about';
+}
+
+function redirectToContact() {
+    window.location.href = window.CONFIG.BASE_URL + '/contact';
+}
+
 function redirectToApp() {
-    window.location.href = '/ports/13378/app';
+    window.location.href = window.CONFIG.BASE_URL + '/app';
 }
 
 async function fetchLocation() {
@@ -17,10 +35,10 @@ async function fetchLocation() {
     console.log("Fetching location data for:", startingCity, "to", destinationCity);
 
     try {
-        let startResponse = await fetch(`/ports/13378/get-location?city=${startingCity}&location_type=source`);
+        let startResponse = await fetch(window.CONFIG.BASE_URL + `/get-location?city=${startingCity}&location_type=source`);
         let startData = await startResponse.json();
 
-        let destResponse = await fetch(`/ports/13378/get-location?city=${destinationCity}&location_type=destination`);
+        let destResponse = await fetch(window.CONFIG.BASE_URL + `/get-location?city=${destinationCity}&location_type=destination`);
         let destData = await destResponse.json();
 
         if (startData.error) {
