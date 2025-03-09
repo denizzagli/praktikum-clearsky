@@ -151,7 +151,57 @@ async function setParameters() {
         }
 
         console.log("Server Response:", data);
+
+        setTimeout(showFrequencySelection, 500);
     } catch (error) {
         console.error("Error sending parameters:", error);
     }
 }
+
+function showFrequencySelection() {
+    document.getElementById("time-selection-title").style.display = "block";
+    document.getElementById("time-selection-script").style.display = "block";
+    document.getElementById("time-title").style.display = "block";
+    document.getElementById("time-selection-dropdown").style.display = "block";
+    document.getElementById("time-selection-button").style.display = "block";
+}
+
+async function setFrequency(){
+    let frequencySelected = document.getElementById("time-selection-dropdown").value;
+
+    if (!frequencySelected) {
+        alert("Please select at least one frequency.");
+
+        return;
+    }
+
+    console.log("Selected Frequency:");
+    console.log("Frequency:", frequencySelected);
+
+    try {
+        let response = await fetch(window.CONFIG.BASE_URL + "/set-frequency", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                time: frequencySelected,
+            })
+        });
+
+        let data;
+
+        if (!response.ok) {
+            console.error(`HTTP error! Status: ${response.status}`);
+
+            data = {error: `HTTP error: ${response.status}`};
+        } else {
+            data = await response.json();
+        }
+
+        console.log("Server Response:", data);
+    } catch (error) {
+        console.error("Error sending frequency:", error);
+    }
+}
+

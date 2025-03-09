@@ -112,8 +112,43 @@
                     Set
                 </button>
             </div>
+
         </div>
     </div>
+
+    <!-- Time Selection Title and Script -->
+    <h2 id="time-selection-title" class="text-center text-blue-600 text-2xl font-semibold mt-5" style="display: none;">
+        Data Fetch Frequency</h2>
+    <p id="time-selection-script" class="mt-3 text-center text-gray-500 text-l" style="display: none;">Select how
+        frequently the data should be updated for real-time visualization.</p>
+
+    <div id="time-description" class="mt-4 d-flex flex-column align-items-center">
+        <div class="d-flex gap-4">
+
+            <!-- Time Selection -->
+            <div>
+                <label id="time-title" for="time-selection-dropdown" class="text-gray-700 font-medium mb-1"
+                       style="display: none;">Time Selection:</label>
+                <select id="time-selection-dropdown" class="border rounded px-4 py-2 w-100" style="display: none;">
+                    <option value="1800">Every 30 minutes</option>
+                    <option value="3600">Every 1 hour</option>
+                    <option value="5400">Every 1.5 hours</option>
+                    <option value="7200">Every 2 hours</option>
+                    <option value="10800">Every 3 hours</option>
+                </select>
+            </div>
+
+            <!-- Time Selection Button -->
+            <div class="d-flex align-items-end">
+                <button onclick="setFrequency()" id="time-selection-button" class="btn-primary-custom"
+                        style="display: none;">
+                    Set
+                </button>
+            </div>
+
+        </div>
+    </div>
+
 
 </div>
 

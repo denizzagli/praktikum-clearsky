@@ -20,8 +20,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-location_data = {"source": None, "destination": None}
-
 
 @app.get("/")
 async def home(request: Request):
@@ -41,6 +39,9 @@ async def contact(request: Request):
 @app.get("/app")
 async def contact(request: Request):
     return templates.TemplateResponse("app.html", {"request": request})
+
+
+location_data = {"source": None, "destination": None}
 
 
 @app.get("/get-location")
@@ -109,6 +110,25 @@ def set_parameters(params: ParameterModel):
 @app.get("/get-parameters")
 def get_parameters():
     return JSONResponse(content=parameters)
+
+
+class FrequencyModel(BaseModel):
+    time: float
+
+
+frequency = {"time": None}
+
+
+@app.post("/set-frequency")
+def set_parameters(params: FrequencyModel):
+    frequency["time"] = params.time
+
+    return JSONResponse(content=frequency)
+
+
+@app.get("/get-frequency")
+def get_frequency():
+    return JSONResponse(content=frequency)
 
 
 @app.get("/weather")
