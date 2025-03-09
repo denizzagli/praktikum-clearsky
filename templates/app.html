@@ -65,6 +65,56 @@
             </div>
         </div>
     </div>
+
+    <!-- Parameters Title and Script -->
+    <h2 id="param-title" class="text-center text-blue-600 text-2xl font-semibold mt-5" style="display: none;">Parameter
+        Selection</h2>
+    <p id="param-script" class="mt-3 text-center text-gray-500 text-l" style="display: none;">To observe weather
+        conditions and air pollution, which parameters would you like to analyze? Please select from the options
+        below.</p>
+
+    <div id="param-description" class="mt-4 d-flex flex-column align-items-center">
+        <div class="d-flex gap-4">
+
+            <!-- Weather Parameter -->
+            <div>
+                <label id="weather-parameter-title" for="weather-parameter" class="text-gray-700 font-medium mb-1"
+                       style="display: none;">Weather:</label>
+                <select id="weather-parameter" class="border rounded px-4 py-2 w-100" style="display: none;">
+                    <option>temperature</option>
+                    <option>precipitation</option>
+                    <option>humidity</option>
+                    <option>wind_speed</option>
+                </select>
+            </div>
+
+            <!-- Air Pollution Parameter -->
+            <div>
+                <label id="air-pollution-parameter-title" for="air-pollution-parameter"
+                       class="text-gray-700 font-medium mb-1" style="display: none;">Air Pollution:</label>
+                <select id="air-pollution-parameter" class="border rounded px-4 py-2 w-100" style="display: none;">
+                    <option>aqi</option>
+                    <option>co</option>
+                    <option>no</option>
+                    <option>no2</option>
+                    <option>o3</option>
+                    <option>so2</option>
+                    <option>pm2_5</option>
+                    <option>pm10</option>
+                    <option>nh3</option>
+                </select>
+            </div>
+
+            <!-- Set Button -->
+            <div class="d-flex align-items-end">
+                <button onclick="setParameters()" id="set-parameters-button" class="btn-primary-custom"
+                        style="display: none;">
+                    Set
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <div id="map" style="height: 400px; margin-top: 20px;"></div>

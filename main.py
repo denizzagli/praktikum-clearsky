@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -87,6 +88,27 @@ def get_location_destination():
         return location_data["destination"]
     else:
         return JSONResponse({"error": "No destination location found."}, status_code=404)
+
+
+class ParameterModel(BaseModel):
+    weather_parameter: str
+    air_quality_parameter: str
+
+
+parameters = {"weather_parameter": None, "air_quality_parameter": None}
+
+
+@app.post("/set-parameters")
+def set_parameters(params: ParameterModel):
+    parameters["weather_parameter"] = params.weather_parameter
+    parameters["air_quality_parameter"] = params.air_quality_parameter
+
+    return JSONResponse(content=parameters)
+
+
+@app.get("/get-parameters")
+def get_parameters():
+    return JSONResponse(content=parameters)
 
 
 @app.get("/weather")

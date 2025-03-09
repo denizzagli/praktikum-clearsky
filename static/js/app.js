@@ -57,11 +57,23 @@ async function fetchLocation() {
         console.log("Destination City Data:", destData);
 
         displayMaps(startData, destData);
+
+        setTimeout(showParameterSelection, 500);
     } catch (error) {
         console.error("Error fetching location data:", error);
 
         alert("Failed to fetch location data.");
     }
+}
+
+function showParameterSelection() {
+    document.getElementById("param-title").style.display = "block";
+    document.getElementById("param-script").style.display = "block";
+    document.getElementById("weather-parameter-title").style.display = "block";
+    document.getElementById("weather-parameter").style.display = "block";
+    document.getElementById("air-pollution-parameter-title").style.display = "block";
+    document.getElementById("air-pollution-parameter").style.display = "block";
+    document.getElementById("set-parameters-button").style.display = "block";
 }
 
 function displayMaps(startData, destData) {
@@ -100,4 +112,46 @@ function displayMaps(startData, destData) {
     L.marker([destData.lat, destData.lon]).addTo(destMap)
         .bindPopup(`<b>Destination City:</b> ${destData.name}`)
         .openPopup();
+}
+
+async function setParameters() {
+    let weatherSelected = document.getElementById("weather-parameter").value;
+    let airQualitySelected = document.getElementById("air-pollution-parameter").value;
+
+    if (!weatherSelected || !airQualitySelected) {
+        alert("Please select at least one parameter.");
+
+        return;
+    }
+
+    console.log("Selected Parameters:");
+    console.log("Weather:", weatherSelected);
+    console.log("Air Quality:", airQualitySelected);
+
+    try {
+        let response = await fetch(window.CONFIG.BASE_URL + "/set-parameters", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                weather_parameter: weatherSelected,
+                air_quality_parameter: airQualitySelected
+            })
+        });
+
+        let data;
+
+        if (!response.ok) {
+            console.error(`HTTP error! Status: ${response.status}`);
+
+            data = {error: `HTTP error: ${response.status}`};
+        } else {
+            data = await response.json();
+        }
+
+        console.log("Server Response:", data);
+    } catch (error) {
+        console.error("Error sending parameters:", error);
+    }
 }
