@@ -26,6 +26,15 @@ async def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 
+@app.post("/")
+async def receive_post(request: Request):
+    data = await request.body()
+
+    print("CPEE data:", data.decode())
+
+    return {"data": data.decode()}
+
+
 @app.get("/about")
 async def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
