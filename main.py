@@ -3,11 +3,10 @@ import os
 import httpx
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -56,14 +55,8 @@ async def contact(request: Request):
 
 
 @app.post("/provide-process-id")
-async def provide_process_id(request: Request):
-    try:
-        body = await request.json()
-        instance_id = body.get("instance_id")
-
-        return {"instance_id": instance_id}
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=400)
+async def provide_process_id(instance_id: str = Form(...)):
+    return {"received_instance_id": instance_id}
 
 
 # PROD
