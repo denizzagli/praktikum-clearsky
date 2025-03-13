@@ -21,11 +21,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
+# PROD
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 
+# PROD
 @app.post("/")
 async def receive_post(request: Request):
     data = await request.body()
@@ -35,39 +37,54 @@ async def receive_post(request: Request):
     return {"data": data.decode()}
 
 
+# PROD
 @app.get("/about")
 async def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 
+# PROD
 @app.get("/contact")
 async def contact(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
 
 
+# PROD
 @app.get("/app")
 async def contact(request: Request):
     return templates.TemplateResponse("app.html", {"request": request})
 
 
-location_data = {"source": None, "destination": None}
-
-
-@app.get("/get-location")
-async def get_location(city: str, location_type: str):
+@app.post("/provide-process-id")
+async def provide_process_id(request: Request):
     try:
+        body = await request.json()
+        instance_id = body.get("instance_id")
+
+        return {"instance_id": instance_id}
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=400)
+
+
+# PROD
+@app.post("/get-coordinates")
+async def get_location(request: Request):
+    try:
+        body = await request.json()
+        city = body.get("city")
+
+        if not city:
+            return JSONResponse(content={"error": "City is required."}, status_code=400)
+
         url = f"https://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={OPENWEATHER_API_KEY}"
+
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
+
         response.raise_for_status()
         data = response.json()
 
         if len(data) > 0:
-            if location_type == "source":
-                location_data["source"] = data
-            elif location_type == "destination":
-                location_data["destination"] = data
-
             return {
                 "name": data[0]["name"],
                 "lat": data[0]["lat"],
@@ -82,62 +99,6 @@ async def get_location(city: str, location_type: str):
         return JSONResponse({"error": f"HTTP error: {e.response.status_code}"}, status_code=e.response.status_code)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
-
-
-@app.get("/get-location-source")
-def get_location_source():
-    if location_data["source"]:
-        return location_data["source"]
-    else:
-        return JSONResponse({"error": "No source location found."}, status_code=404)
-
-
-@app.get("/get-location-destination")
-def get_location_destination():
-    if location_data["destination"]:
-        return location_data["destination"]
-    else:
-        return JSONResponse({"error": "No destination location found."}, status_code=404)
-
-
-class ParameterModel(BaseModel):
-    weather_parameter: str
-    air_quality_parameter: str
-
-
-parameters = {"weather_parameter": None, "air_quality_parameter": None}
-
-
-@app.post("/set-parameters")
-def set_parameters(params: ParameterModel):
-    parameters["weather_parameter"] = params.weather_parameter
-    parameters["air_quality_parameter"] = params.air_quality_parameter
-
-    return JSONResponse(content=parameters)
-
-
-@app.get("/get-parameters")
-def get_parameters():
-    return JSONResponse(content=parameters)
-
-
-class FrequencyModel(BaseModel):
-    time: float
-
-
-frequency = {"time": None}
-
-
-@app.post("/set-frequency")
-def set_parameters(params: FrequencyModel):
-    frequency["time"] = params.time
-
-    return JSONResponse(content=frequency)
-
-
-@app.get("/get-frequency")
-def get_frequency():
-    return JSONResponse(content=frequency)
 
 
 @app.get("/weather")
