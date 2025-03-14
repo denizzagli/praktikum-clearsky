@@ -4,7 +4,25 @@ fetch("/static/config.json")
     .then(response => response.json())
     .then(data => {
         window.CONFIG = data;
-    });
+        initApp();
+    })
+    .catch(error => console.error("Error loading config:", error));
+
+function initApp() {
+    if (window.location.pathname === "/") {
+        setTimeout(() => fetchInstances(), 500);
+    }
+
+    let pathParts = window.location.pathname.split("/");
+    if (pathParts.includes("app")) {
+        let instanceIdIndex = pathParts.indexOf("app") + 1;
+        let instanceId = pathParts[instanceIdIndex];
+
+        if (instanceId) {
+            fetchDatasForMaps(instanceId);
+        }
+    }
+}
 
 function redirectToHome() {
     window.location.href = window.CONFIG.BASE_URL + '/';
@@ -100,26 +118,15 @@ async function fetchDatasForMaps(instanceId) {
 
         if (data.source_coordinates && data.destination_coordinates) {
             displayMaps(
-                {lat: data.source_coordinates.lat, lon: data.source_coordinates.lon},
-                {lat: data.destination_coordinates.lat, lon: data.destination_coordinates.lon}
+                {name: data.source_name, lat: data.source_coordinates.lat, lon: data.source_coordinates.lon},
+                {
+                    name: data.destination_name,
+                    lat: data.destination_coordinates.lat,
+                    lon: data.destination_coordinates.lon
+                }
             );
         }
     } catch (error) {
         console.error("Error fetching instance data:", error);
     }
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-    if (window.location.pathname === "/") {
-        setTimeout(fetchInstances, 500);
-    }
-
-    let pathParts = window.location.pathname.split("/");
-
-    if (pathParts.length === 3 && pathParts[1] === "app") {
-        let instanceId = pathParts[2];
-
-        fetchDatasForMaps(instanceId);
-    }
-});
-
