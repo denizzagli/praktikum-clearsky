@@ -89,7 +89,7 @@ async function fetchInstances() {
 
 function goToInstance(instanceId) {
     if (instanceId) {
-        window.location.href = "/app/" + instanceId;
+        window.location.href = window.CONFIG.BASE_URL + "/app/" + instanceId;
     }
 }
 
