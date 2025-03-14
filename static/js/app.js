@@ -18,64 +18,6 @@ function redirectToContact() {
     window.location.href = window.CONFIG.BASE_URL + '/contact';
 }
 
-function redirectToApp() {
-    window.location.href = window.CONFIG.BASE_URL + '/app';
-}
-
-async function fetchLocation() {
-    let startingCity = document.getElementById("starting-city").value;
-    let destinationCity = document.getElementById("destination-city").value;
-
-    if (startingCity === destinationCity) {
-        alert("Starting and Destination cities cannot be the same.");
-
-        return;
-    }
-
-    console.log("Fetching location data for:", startingCity, "to", destinationCity);
-
-    try {
-        let startResponse = await fetch(window.CONFIG.BASE_URL + `/get-location?city=${startingCity}&location_type=source`);
-        let startData = await startResponse.json();
-
-        let destResponse = await fetch(window.CONFIG.BASE_URL + `/get-location?city=${destinationCity}&location_type=destination`);
-        let destData = await destResponse.json();
-
-        if (startData.error) {
-            alert(`Error fetching starting city: ${startData.error}`);
-
-            return;
-        }
-
-        if (destData.error) {
-            alert(`Error fetching destination city: ${destData.error}`);
-
-            return;
-        }
-
-        console.log("Starting City Data:", startData);
-        console.log("Destination City Data:", destData);
-
-        displayMaps(startData, destData);
-
-        setTimeout(showParameterSelection, 500);
-    } catch (error) {
-        console.error("Error fetching location data:", error);
-
-        alert("Failed to fetch location data.");
-    }
-}
-
-function showParameterSelection() {
-    document.getElementById("param-title").style.display = "block";
-    document.getElementById("param-script").style.display = "block";
-    document.getElementById("weather-parameter-title").style.display = "block";
-    document.getElementById("weather-parameter").style.display = "block";
-    document.getElementById("air-pollution-parameter-title").style.display = "block";
-    document.getElementById("air-pollution-parameter").style.display = "block";
-    document.getElementById("set-parameters-button").style.display = "block";
-}
-
 function displayMaps(startData, destData) {
     if (!document.getElementById("map-start") || !document.getElementById("map-dest")) {
         console.error("Map container not found!");
@@ -122,7 +64,7 @@ async function fetchInstances() {
         return;
     }
 
-    let response = await fetch("/get-active-instances");
+    let response = await fetch(window.CONFIG.BASE_URL + "/get-active-instances");
     let data = await response.json();
 
     dropdownMenu.innerHTML = "";
@@ -153,7 +95,7 @@ function goToInstance(instanceId) {
 
 async function fetchDatasForMaps(instanceId) {
     try {
-        let response = await fetch(`/get-instance/${instanceId}`);
+        let response = await fetch(window.CONFIG.BASE_URL + `/get-instance/${instanceId}`);
         let data = await response.json();
 
         if (data.source_coordinates && data.destination_coordinates) {
