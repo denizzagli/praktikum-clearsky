@@ -31,11 +31,11 @@ async def home(request: Request):
 # PROD
 @app.post("/")
 async def receive_post(request: Request):
-    data = await request.body()
+    form = await request.form()
 
-    print("CPEE data:", data.decode())
+    json_data = form.get("notification")
 
-    return {"data": data.decode()}
+    return json_data
 
 
 # PROD
