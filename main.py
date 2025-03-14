@@ -41,6 +41,8 @@ async def receive_post(request: Request):
     if match:
         json_data = json.loads(match.group(0))
 
+        print(json_data)
+
         return json_data
 
     return {"error": "No JSON data found"}
