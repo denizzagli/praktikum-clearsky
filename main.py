@@ -145,7 +145,7 @@ async def get_location(instance_id: str = Form(...),
 
 
 # PROD
-@app.get("/get-weather")
+@app.post("/get-weather")
 async def get_weather(lat: float = Form(...),
                       lon: float = Form(...)):
     try:
@@ -175,7 +175,7 @@ async def get_weather(lat: float = Form(...),
 
 
 # PROD
-@app.get("/get-air-quality")
+@app.post("/get-air-quality")
 async def get_air_quality(lat: float = Form(...),
                           lon: float = Form(...)):
     try:
