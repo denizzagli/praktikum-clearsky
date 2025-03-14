@@ -7,6 +7,8 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import re
+import json
 
 app = FastAPI()
 
@@ -32,10 +34,16 @@ async def home(request: Request):
 @app.post("/")
 async def receive_post(request: Request):
     data = await request.body()
+    decoded_data = data.decode()
 
-    print("CPEE data:", data.decode())
+    match = re.search(r'{.*}', decoded_data, re.DOTALL)
 
-    return {"data": data.decode()}
+    if match:
+        json_data = json.loads(match.group(0))
+
+        return json_data
+
+    return {"error": "No JSON data found"}
 
 
 # PROD
