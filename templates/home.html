@@ -9,9 +9,18 @@
     Real-Time Weather and Air Quality Visualization
 </p>
 
-<!-- Start Button -->
-<div class="mt-6 text-center">
-    <button onclick="redirectToApp()" class="btn-primary-custom">Start</button>
+<div class="instance-container">
+    <label for="instanceDropdown" class="font-bold text-lg">Instances:</label>
+    <div class="dropdown text-center">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="instanceDropdownButton"
+                data-bs-toggle="dropdown" aria-expanded="false">
+            Select Instance
+        </button>
+        <ul class="dropdown-menu" id="instanceDropdown">
+            <li><a class="dropdown-item disabled" href="#">No active instances</a></li>
+        </ul>
+    </div>
+    <button onclick="fetchInstances()" class="btn-primary-custom">Refresh</button>
 </div>
 
 {% endblock %}

@@ -19,6 +19,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
+instance_data = {}
+
 
 # PROD
 @app.get("/")
@@ -54,21 +56,59 @@ async def contact(request: Request):
     return templates.TemplateResponse("app.html", {"request": request})
 
 
+# PROD
 @app.post("/provide-process-id")
 async def provide_process_id(instance_id: str = Form(...)):
-    return {"received_instance_id": instance_id}
+    instance_data[str(instance_id)] = {
+        "source_name": None,
+        "destination_name": None,
+        "source_coordinates": None,
+        "destination_coordinates": None,
+        "source_weather_data": [],
+        "destination_weather_data": [],
+        "source_air_pollution_data": [],
+        "destination_air_pollution_data": []
+    }
+
+    return {"message": "Instance created", "instance_id": instance_id}
+
+
+# PROD
+@app.get("/get-all-instances")
+async def get_all_instances():
+    return JSONResponse(content=instance_data)
+
+
+# PROD
+@app.get("/get-active-instances")
+async def get_active_instances():
+    return {"instances": list(instance_data.keys())}
+
+
+@app.get("/get-instance/{instance_id}")
+async def get_instance(instance_id: str):
+    if instance_id in instance_data:
+        return instance_data[instance_id]
+    return JSONResponse(content={"error": "Instance not found"}, status_code=404)
+
+
+# PROD
+@app.get("/app/{instance_id}")
+async def app_instance(request: Request, instance_id: str):
+    data = instance_data.get(instance_id, None)
+
+    if not data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    return templates.TemplateResponse("app.html", {"request": request, "instance_id": instance_id, "data": data})
 
 
 # PROD
 @app.post("/get-coordinates")
-async def get_location(request: Request):
+async def get_location(instance_id: str = Form(...),
+                       city: str = Form(...),
+                       coordinate_type: str = Form(...)):
     try:
-        body = await request.json()
-        city = body.get("city")
-
-        if not city:
-            return JSONResponse(content={"error": "City is required."}, status_code=400)
-
         url = f"https://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={OPENWEATHER_API_KEY}"
 
         async with httpx.AsyncClient() as client:
@@ -77,13 +117,23 @@ async def get_location(request: Request):
         response.raise_for_status()
         data = response.json()
 
+        response_json = {
+            "name": data[0]["name"],
+            "lat": data[0]["lat"],
+            "lon": data[0]["lon"],
+            "country": data[0]["country"]
+        }
+
+        if coordinate_type == "source":
+            instance_data[instance_id]["source_name"] = city
+            instance_data[instance_id]["source_coordinates"] = response_json
+
+        elif coordinate_type == "destination":
+            instance_data[instance_id]["destination_name"] = city
+            instance_data[instance_id]["destination_coordinates"] = response_json
+
         if len(data) > 0:
-            return {
-                "name": data[0]["name"],
-                "lat": data[0]["lat"],
-                "lon": data[0]["lon"],
-                "country": data[0]["country"]
-            }
+            return response_json
         else:
             return JSONResponse({"error": "City not found."}, status_code=404)
     except httpx.RequestError as e:
@@ -94,12 +144,16 @@ async def get_location(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-@app.get("/weather")
-async def get_weather(lat: float, lon: float):
+# PROD
+@app.get("/get-weather")
+async def get_weather(lat: float = Form(...),
+                      lon: float = Form(...)):
     try:
         url = f"https://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={lat},{lon}"
+
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
+
         response.raise_for_status()
         data = response.json()
 
@@ -120,12 +174,16 @@ async def get_weather(lat: float, lon: float):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-@app.get("/air-quality")
-async def get_air_quality(lat: float, lon: float):
+# PROD
+@app.get("/get-air-quality")
+async def get_air_quality(lat: float = Form(...),
+                          lon: float = Form(...)):
     try:
         url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}"
+
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
+
         response.raise_for_status()
         data = response.json()
 
@@ -150,5 +208,4 @@ async def get_air_quality(lat: float, lon: float):
 
 
 if __name__ == "__main__":
-    # uvicorn.run(app, host="0.0.0.0", port=8000)
     uvicorn.run(app, host="::1", port=13378)

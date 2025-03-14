@@ -34,3 +34,21 @@
 .btn-primary-custom:hover {
     background-color: #1d4ed8; /* Tailwind hover:bg-blue-700 */
 }
+
+.instance-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.dropdown-custom {
+    padding: 10px;
+    font-size: 16px;
+    width: 200px;
+    text-align: center;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+}

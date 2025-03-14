@@ -114,94 +114,70 @@ function displayMaps(startData, destData) {
         .openPopup();
 }
 
-async function setParameters() {
-    let weatherSelected = document.getElementById("weather-parameter").value;
-    let airQualitySelected = document.getElementById("air-pollution-parameter").value;
+async function fetchInstances() {
+    let dropdownMenu = document.getElementById("instanceDropdown");
 
-    if (!weatherSelected || !airQualitySelected) {
-        alert("Please select at least one parameter.");
-
+    if (!dropdownMenu) {
+        console.error("Dropdown menu not found!");
         return;
     }
 
-    console.log("Selected Parameters:");
-    console.log("Weather:", weatherSelected);
-    console.log("Air Quality:", airQualitySelected);
+    let response = await fetch("/get-active-instances");
+    let data = await response.json();
 
-    try {
-        let response = await fetch(window.CONFIG.BASE_URL + "/set-parameters", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                weather_parameter: weatherSelected,
-                air_quality_parameter: airQualitySelected
-            })
-        });
+    dropdownMenu.innerHTML = "";
 
-        let data;
-
-        if (!response.ok) {
-            console.error(`HTTP error! Status: ${response.status}`);
-
-            data = {error: `HTTP error: ${response.status}`};
-        } else {
-            data = await response.json();
-        }
-
-        console.log("Server Response:", data);
-
-        setTimeout(showFrequencySelection, 500);
-    } catch (error) {
-        console.error("Error sending parameters:", error);
-    }
-}
-
-function showFrequencySelection() {
-    document.getElementById("time-selection-title").style.display = "block";
-    document.getElementById("time-selection-script").style.display = "block";
-    document.getElementById("time-title").style.display = "block";
-    document.getElementById("time-selection-dropdown").style.display = "block";
-    document.getElementById("time-selection-button").style.display = "block";
-}
-
-async function setFrequency(){
-    let frequencySelected = document.getElementById("time-selection-dropdown").value;
-
-    if (!frequencySelected) {
-        alert("Please select at least one frequency.");
-
+    if (data.instances.length === 0) {
+        dropdownMenu.innerHTML = '<li><a class="dropdown-item disabled" href="#">No active instances</a></li>';
         return;
     }
 
-    console.log("Selected Frequency:");
-    console.log("Frequency:", frequencySelected);
+    data.instances.forEach(instance => {
+        let item = document.createElement("li");
+        let link = document.createElement("a");
+        link.classList.add("dropdown-item");
+        link.href = "#";
+        link.textContent = `Instance ${instance}`;
+        link.onclick = () => goToInstance(instance);
+        item.appendChild(link);
+        dropdownMenu.appendChild(item);
+    });
+}
 
-    try {
-        let response = await fetch(window.CONFIG.BASE_URL + "/set-frequency", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                time: frequencySelected,
-            })
-        });
 
-        let data;
-
-        if (!response.ok) {
-            console.error(`HTTP error! Status: ${response.status}`);
-
-            data = {error: `HTTP error: ${response.status}`};
-        } else {
-            data = await response.json();
-        }
-
-        console.log("Server Response:", data);
-    } catch (error) {
-        console.error("Error sending frequency:", error);
+function goToInstance(instanceId) {
+    if (instanceId) {
+        window.location.href = "/app/" + instanceId;
     }
 }
+
+async function fetchDatasForMaps(instanceId) {
+    try {
+        let response = await fetch(`/get-instance/${instanceId}`);
+        let data = await response.json();
+
+        if (data.source_coordinates && data.destination_coordinates) {
+            displayMaps(
+                {lat: data.source_coordinates.lat, lon: data.source_coordinates.lon},
+                {lat: data.destination_coordinates.lat, lon: data.destination_coordinates.lon}
+            );
+        }
+    } catch (error) {
+        console.error("Error fetching instance data:", error);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (window.location.pathname === "/") {
+        setTimeout(fetchInstances, 500);
+    }
+
+    let pathParts = window.location.pathname.split("/");
+
+    if (pathParts.length === 3 && pathParts[1] === "app") {
+        let instanceId = pathParts[2];
+
+        fetchDatasForMaps(instanceId);
+    }
+});
 
