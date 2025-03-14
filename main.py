@@ -41,7 +41,19 @@ async def receive_post(request: Request):
     if match:
         json_data = json.loads(match.group(0))
 
-        print(json_data)
+        if str(json_data["instance"]) in instance_data and "content" in json_data and "changed" in json_data["content"]:
+            if json_data["content"]["changed"][0] == "source_weather_response":
+                instance_data[str(json_data["instance"])]["source_weather_data"].append(
+                    json_data["content"]["values"]["source_weather_response"])
+            elif json_data["content"]["changed"][0] == "source_air_pollution_response":
+                instance_data[str(json_data["instance"])]["source_air_pollution_data"].append(
+                    json_data["content"]["values"]["source_air_pollution_response"])
+            elif json_data["content"]["changed"][0] == "destination_weather_response":
+                instance_data[str(json_data["instance"])]["destination_weather_data"].append(
+                    json_data["content"]["values"]["destination_weather_response"])
+            elif json_data["content"]["changed"][0] == "destination_air_pollution_response":
+                instance_data[str(json_data["instance"])]["destination_air_pollution_data"].append(
+                    json_data["content"]["values"]["destination_air_pollution_response"])
 
         return json_data
 
