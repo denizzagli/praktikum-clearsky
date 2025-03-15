@@ -97,7 +97,7 @@ async function fetchInstances() {
         let link = document.createElement("a");
         link.classList.add("dropdown-item");
         link.href = "#";
-        link.textContent = `Instance ${instance}`;
+        link.textContent = `${instance}`;
         link.onclick = () => goToInstance(instance);
         item.appendChild(link);
         dropdownMenu.appendChild(item);

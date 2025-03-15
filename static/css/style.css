@@ -22,19 +22,6 @@
     letter-spacing: 0.5px;
 }
 
-.btn-primary-custom {
-    background-color: #3b82f6; /* Tailwind bg-blue-500 */
-    color: white;
-    font-weight: bold;
-    padding: 0.5rem 1rem; /* py-2 px-4 */
-    border-radius: 0.25rem; /* rounded */
-    transition: background-color 0.3s ease-in-out;
-}
-
-.btn-primary-custom:hover {
-    background-color: #1d4ed8; /* Tailwind hover:bg-blue-700 */
-}
-
 .instance-container {
     display: flex;
     align-items: center;
@@ -51,4 +38,49 @@
     border-radius: 8px;
     border: 1px solid #ccc;
     background-color: #f8f8f8;
+}
+
+.map-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2563EB;
+    text-align: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #2563EB;
+}
+
+.instances-label {
+    font-size: 20px;
+    font-weight: 600;
+    color: #495057;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+#instanceDropdownButton {
+    min-width: 180px;
+    font-size: 16px;
+}
+
+.btn-primary-custom {
+    background-color: #4A90E2;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    transition: background-color 0.3s ease-in-out, transform 0.2s;
+}
+
+.btn-primary-custom:hover {
+    background-color: #357ABD;
+    transform: translateY(-1px);
+}
+
+.btn-primary-custom:active {
+    background-color: #2C5E9E;
+    transform: translateY(0);
 }
