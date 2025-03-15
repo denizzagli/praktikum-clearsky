@@ -40,7 +40,7 @@ except (FileNotFoundError, json.JSONDecodeError):
 
 
 # Function to save data to the JSON file
-async def save_to_json():
+def save_to_json():
     json_string = json.dumps(instance_data, indent=4)
     with open(DATA_FILE, "w", encoding="utf-8") as output_file:
         output_file.write(json_string)
@@ -67,7 +67,8 @@ async def receive_post(request: Request):
             json_data = json.loads(match.group(0))
 
             # Check if the instance exists in stored data and required keys are present
-            if str(json_data["instance"]) in instance_data and "content" in json_data and "changed" in json_data["content"]:
+            if str(json_data["instance"]) in instance_data and "content" in json_data and "changed" in json_data[
+                "content"]:
                 if json_data["content"]["changed"][0] == "source_weather_response":
                     instance_data[str(json_data["instance"])]["source_weather_data"].append(
                         json_data["content"]["values"]["source_weather_response"])
@@ -82,7 +83,7 @@ async def receive_post(request: Request):
                         json_data["content"]["values"]["destination_air_pollution_response"])
 
                 # Update JSON data file
-                await save_to_json()
+                save_to_json()
 
             # Return the processed JSON data
             return json_data
@@ -125,7 +126,7 @@ async def provide_process_id(instance_id: str = Form(...)):
     }
 
     # Update JSON data file
-    await save_to_json()
+    save_to_json()
 
     return {"message": "Instance created", "instance_id": instance_id}
 
@@ -197,7 +198,7 @@ async def get_location(instance_id: str = Form(...),
 
         if len(data) > 0:
             # Update JSON data file
-            await save_to_json()
+            save_to_json()
 
             # Return the extracted location data if available
             return response_json
