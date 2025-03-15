@@ -55,39 +55,46 @@ async def home(request: Request):
 # Route to handle POST requests at "/"
 @app.post("/")
 async def receive_post(request: Request):
-    # Read and decode request body
-    data = await request.body()
-    decoded_data = data.decode()
+    try:
+        # Read and decode request body
+        data = await request.body()
+        decoded_data = data.decode()
 
-    # Extract JSON data from body
-    match = re.search(r'{.*}', decoded_data, re.DOTALL)
+        # Extract JSON data from body
+        match = re.search(r'{.*}', decoded_data, re.DOTALL)
 
-    if match:
-        json_data = json.loads(match.group(0))
+        if match:
+            json_data = json.loads(match.group(0))
 
-        # Check if the instance exists in stored data and required keys are present
-        if str(json_data["instance"]) in instance_data and "content" in json_data and "changed" in json_data["content"]:
-            if json_data["content"]["changed"][0] == "source_weather_response":
-                instance_data[str(json_data["instance"])]["source_weather_data"].append(
-                    json_data["content"]["values"]["source_weather_response"])
-            elif json_data["content"]["changed"][0] == "source_air_pollution_response":
-                instance_data[str(json_data["instance"])]["source_air_pollution_data"].append(
-                    json_data["content"]["values"]["source_air_pollution_response"])
-            elif json_data["content"]["changed"][0] == "destination_weather_response":
-                instance_data[str(json_data["instance"])]["destination_weather_data"].append(
-                    json_data["content"]["values"]["destination_weather_response"])
-            elif json_data["content"]["changed"][0] == "destination_air_pollution_response":
-                instance_data[str(json_data["instance"])]["destination_air_pollution_data"].append(
-                    json_data["content"]["values"]["destination_air_pollution_response"])
+            # Check if the instance exists in stored data and required keys are present
+            if str(json_data["instance"]) in instance_data and "content" in json_data and "changed" in json_data["content"]:
+                if json_data["content"]["changed"][0] == "source_weather_response":
+                    instance_data[str(json_data["instance"])]["source_weather_data"].append(
+                        json_data["content"]["values"]["source_weather_response"])
+                elif json_data["content"]["changed"][0] == "source_air_pollution_response":
+                    instance_data[str(json_data["instance"])]["source_air_pollution_data"].append(
+                        json_data["content"]["values"]["source_air_pollution_response"])
+                elif json_data["content"]["changed"][0] == "destination_weather_response":
+                    instance_data[str(json_data["instance"])]["destination_weather_data"].append(
+                        json_data["content"]["values"]["destination_weather_response"])
+                elif json_data["content"]["changed"][0] == "destination_air_pollution_response":
+                    instance_data[str(json_data["instance"])]["destination_air_pollution_data"].append(
+                        json_data["content"]["values"]["destination_air_pollution_response"])
 
-            # Update JSON data file
-            await save_to_json()
+                # Update JSON data file
+                await save_to_json()
 
-        # Return the processed JSON data
-        return json_data
+            # Return the processed JSON data
+            return json_data
 
-    # Return an error response if no JSON data is found
-    return {"error": "No JSON data found"}
+        # Return an error response if no JSON data is found
+        return JSONResponse({"error": "No JSON data found"}, status_code=400)
+    except json.JSONDecodeError:
+        return JSONResponse({"error": "Invalid JSON format"}, status_code=400)
+    except KeyError as e:
+        return JSONResponse({"error": f"Missing key: {str(e)}"}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 # Route for the "About" page
