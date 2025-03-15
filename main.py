@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 
 import httpx
 import uvicorn
@@ -17,6 +18,7 @@ app = FastAPI()
 load_dotenv()
 
 # Get API Keys from environment variables
+DATA_FILE = os.getenv("DATA_FILE", "default.json")
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
@@ -28,6 +30,20 @@ templates = Jinja2Templates(directory="templates")
 
 # Storage to instance data
 instance_data = {}
+
+# Load JSON file or initialize a new data structure
+try:
+    with open(DATA_FILE, "r") as file:
+        instance_data = json.load(file)
+except (FileNotFoundError, json.JSONDecodeError):
+    instance_data = {}
+
+
+# Function to save data to the JSON file
+async def save_to_json():
+    json_string = json.dumps(instance_data, indent=4)
+    with open(DATA_FILE, "w", encoding="utf-8") as output_file:
+        output_file.write(json_string)
 
 
 # Route for the "Home" page
@@ -64,6 +80,9 @@ async def receive_post(request: Request):
                 instance_data[str(json_data["instance"])]["destination_air_pollution_data"].append(
                     json_data["content"]["values"]["destination_air_pollution_response"])
 
+            # Update JSON data file
+            await save_to_json()
+
         # Return the processed JSON data
         return json_data
 
@@ -94,8 +113,12 @@ async def provide_process_id(instance_id: str = Form(...)):
         "source_weather_data": [],
         "destination_weather_data": [],
         "source_air_pollution_data": [],
-        "destination_air_pollution_data": []
+        "destination_air_pollution_data": [],
+        "created_time": int(time.time())
     }
+
+    # Update JSON data file
+    await save_to_json()
 
     return {"message": "Instance created", "instance_id": instance_id}
 
@@ -166,6 +189,9 @@ async def get_location(instance_id: str = Form(...),
             instance_data[instance_id]["destination_coordinates"] = response_json
 
         if len(data) > 0:
+            # Update JSON data file
+            await save_to_json()
+
             # Return the extracted location data if available
             return response_json
         else:
@@ -205,6 +231,7 @@ async def get_weather(lat: float = Form(...),
             "precipitation": data["current"]["precip_mm"],
             "humidity": data["current"]["humidity"],
             "wind_speed": data["current"]["wind_kph"],
+            "time": data["location"]["localtime_epoch"]
         }
     # Handle exceptions
     except httpx.RequestError as e:
@@ -243,6 +270,7 @@ async def get_air_quality(lat: float = Form(...),
             "pm2_5": data["list"][0]["components"]["pm2_5"],
             "pm10": data["list"][0]["components"]["pm10"],
             "nh3": data["list"][0]["components"]["nh3"],
+            "time": data["list"][0]["dt"]
         }
     # Handle exceptions
     except httpx.RequestError as e:
