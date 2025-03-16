@@ -39,6 +39,7 @@ function initApp() {
         if (instanceId) {
             fetchDatasForMaps(instanceId);
             setParameters()
+            startWebSocket(instanceId);
         }
     }
 }
@@ -164,10 +165,10 @@ async function setParameters() {
         return;
     }
 
-    let weatherResponse = await fetch(`/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
+    let weatherResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
     let weatherJsonData = await weatherResponse.json();
 
-    let airPollutionResponse = await fetch(`/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
+    let airPollutionResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
     let airPollutionJsonData = await airPollutionResponse.json();
 
     await drawPlotlyChart("weather", weatherJsonData, weatherParameter);
@@ -204,4 +205,29 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
     };
 
     Plotly.newPlot(dataType + "-chart", [trace1, trace2], layout);
+}
+
+
+function startWebSocket(instanceId) {
+    let socket = new WebSocket(`ws://${window.location.host}/ws/${instanceId}`);
+
+    socket.onopen = function () {
+        console.log(`WebSocket connection opened: ${instanceId}`);
+    };
+
+    socket.onmessage = function (event) {
+        try {
+            setParameters();
+        } catch (error) {
+            console.error("Error processing WebSocket message:", error);
+        }
+    };
+
+    socket.onclose = function () {
+        console.log(`WebSocket connection closed: ${instanceId}`);
+    };
+
+    socket.onerror = function (error) {
+        console.error("WebSocket Error:", error);
+    };
 }
