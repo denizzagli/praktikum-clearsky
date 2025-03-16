@@ -21,8 +21,8 @@ function initApp() {
 
         if (instanceId) {
             fetchDatasForMaps(instanceId);
-            drawEmptyChart("source");
-            drawEmptyChart("destination");
+            drawEmptyChart("weather");
+            drawEmptyChart("air-pollution");
         }
     }
 }
@@ -134,9 +134,8 @@ async function fetchDatasForMaps(instanceId) {
     }
 }
 
-async function setParameters(data_type) {
-    let weatherParameter = document.getElementById("weather-parameter-" + data_type).value;
-    let airQualityParameter = document.getElementById("air-pollution-parameter-" + data_type).value;
+async function setParameters(dataType) {
+    let parameter = document.getElementById(dataType + "-parameter").value;
 
     let pathParts = window.location.pathname.split("/");
     let instanceIdIndex = pathParts.indexOf("app") + 1;
@@ -144,50 +143,51 @@ async function setParameters(data_type) {
 
     if (!instanceId) {
         console.error("Couldn't find instance id.");
+
         return;
     }
 
-    let response = await fetch(`/get-graph-data/${instanceId}?data_type=${data_type}&weather_parameter=${weatherParameter}&air_pollution_parameter=${airQualityParameter}`);
+    let response = await fetch(`/get-graph-data/${instanceId}?data_type=${dataType}&parameter=${parameter}`);
     let jsonData = await response.json();
 
-    drawPlotlyChart(data_type, jsonData, weatherParameter, airQualityParameter);
+    drawPlotlyChart(dataType, jsonData, parameter);
 }
 
-async function drawPlotlyChart(data_type, jsonData, weatherParameter, airQualityParameter) {
+async function drawPlotlyChart(dataType, jsonData, parameter) {
     let timestamps = jsonData.data.map(d => new Date(d.dt * 1000));
-    let weatherValues = jsonData.data.map(d => d["weather_parameter"]);
-    let airQualityValues = jsonData.data.map(d => d["air_pollution_parameter"]);
+    let sourceValues = jsonData.data.map(d => d["source_data"]);
+    let destinationValues = jsonData.data.map(d => d["destination_data"]);
 
     let trace1 = {
         x: timestamps,
-        y: weatherValues,
+        y: sourceValues,
         type: "scatter",
         mode: "lines",
-        name: weatherParameter,
+        name: "Source " + parameter,
         line: {color: "red"}
     };
 
     let trace2 = {
         x: timestamps,
-        y: airQualityValues,
+        y: destinationValues,
         type: "scatter",
         mode: "lines",
-        name: airQualityParameter,
+        name: "Destination " + parameter,
         line: {color: "blue"}
     };
 
     let layout = {
-        title: "Weather & Air Quality Over Time",
+        title: parameter + " Over Time",
         xaxis: {title: "Time"},
         yaxis: {title: "Measurement"}
     };
 
-    Plotly.newPlot("weather-air-quality-chart-" + data_type, [trace1, trace2], layout);
+    Plotly.newPlot(dataType + "-chart", [trace1, trace2], layout);
 }
 
-function drawEmptyChart(data_type) {
+function drawEmptyChart(dataType) {
     let layout = {
-        title: "Weather & Air Pollution Data",
+        title: dataType + " Data",
         xaxis: {title: "Time"},
         yaxis: {title: "Measurement"}
     };
@@ -200,5 +200,5 @@ function drawEmptyChart(data_type) {
         name: "No Data Available"
     }];
 
-    Plotly.newPlot("weather-air-quality-chart-" + data_type, emptyData, layout);
+    Plotly.newPlot(dataType + "-chart", emptyData, layout);
 }

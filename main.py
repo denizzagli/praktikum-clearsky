@@ -290,8 +290,7 @@ async def get_air_quality(lat: float = Form(...),
 
 
 @app.get("/get-graph-data/{instance_id}")
-async def get_graph_data(instance_id: str, data_type: str = Query(...), weather_parameter: str = Query(...),
-                         air_pollution_parameter: str = Query(...)):
+async def get_graph_data(instance_id: str, data_type: str = Query(...), parameter: str = Query(...)):
     if instance_id not in instance_data:
         return JSONResponse({"error": "Instance not found"}, status_code=404)
 
@@ -299,22 +298,24 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), weather_
 
     data = []
 
-    if data_type == "source":
+    if data_type == "weather":
         for i in range(len(instance["source_weather_data"])):
             dt = instance["source_weather_data"][i]["time"]
-            weather_value = instance["source_weather_data"][i][weather_parameter]
-            air_pollution_value = instance["source_air_pollution_data"][i][air_pollution_parameter]
+            source_weather_value = instance["source_weather_data"][i][parameter]
+            destination_weather_value = instance["destination_weather_data"][i][parameter]
 
             data.append(
-                {"dt": dt, "weather_parameter": weather_value, "air_pollution_parameter": air_pollution_value})
-    elif data_type == "destination":
-        for i in range(len(instance["destination_weather_data"])):
-            dt = instance["destination_weather_data"][i]["time"]
-            weather_value = instance["destination_weather_data"][i][weather_parameter]
-            air_pollution_value = instance["destination_air_pollution_data"][i][air_pollution_parameter]
+                {"dt": dt, "source_data": source_weather_value,
+                 "destination_data": destination_weather_value})
+    elif data_type == "air-pollution":
+        for i in range(len(instance["source_air_pollution_data"])):
+            dt = instance["source_air_pollution_data"][i]["time"]
+            source_air_pollution_value = instance["source_air_pollution_data"][i][parameter]
+            destination_air_pollution_value = instance["destination_air_pollution_data"][i][parameter]
 
             data.append(
-                {"dt": dt, "weather_parameter": weather_value, "air_pollution_parameter": air_pollution_value})
+                {"dt": dt, "source_data": source_air_pollution_value,
+                 "destination_data": destination_air_pollution_value})
 
     return {"data": data}
 

@@ -92,3 +92,12 @@
     margin-top: 40px;
     text-align: center;
 }
+
+.parameter-label {
+    font-size: 20px;
+    font-weight: 600;
+    color: #495057;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
