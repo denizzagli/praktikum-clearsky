@@ -165,10 +165,10 @@ async function setParameters() {
         return;
     }
 
-    let weatherResponse = await fetch(`/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
+    let weatherResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
     let weatherJsonData = await weatherResponse.json();
 
-    let airPollutionResponse = await fetch(`/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
+    let airPollutionResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
     let airPollutionJsonData = await airPollutionResponse.json();
 
     await drawPlotlyChart("weather", weatherJsonData, weatherParameter);
