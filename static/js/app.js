@@ -1,5 +1,7 @@
 let startMap, destMap;
 
+let BASE_URL = ""
+
 let parameterDict = {
     "temperature": "Temperature",
     "precipitation": "Precipitation",
@@ -45,15 +47,15 @@ function initApp() {
 }
 
 function redirectToHome() {
-    window.location.href = window.CONFIG.BASE_URL + '/';
+    window.location.href = BASE_URL + '/';
 }
 
 function redirectToAbout() {
-    window.location.href = window.CONFIG.BASE_URL + '/about';
+    window.location.href = BASE_URL + '/about';
 }
 
 function redirectToContact() {
-    window.location.href = window.CONFIG.BASE_URL + '/contact';
+    window.location.href = BASE_URL + '/contact';
 }
 
 function displayMaps(startData, destData) {
@@ -102,7 +104,7 @@ async function fetchInstances() {
         return;
     }
 
-    let response = await fetch(window.CONFIG.BASE_URL + "/get-active-instances");
+    let response = await fetch(BASE_URL + "/get-active-instances");
     let data = await response.json();
 
     dropdownMenu.innerHTML = "";
@@ -127,13 +129,13 @@ async function fetchInstances() {
 
 function goToInstance(instanceId) {
     if (instanceId) {
-        window.location.href = window.CONFIG.BASE_URL + "/app/" + instanceId;
+        window.location.href = BASE_URL + "/app/" + instanceId;
     }
 }
 
 async function fetchDatasForMaps(instanceId) {
     try {
-        let response = await fetch(window.CONFIG.BASE_URL + `/get-instance/${instanceId}`);
+        let response = await fetch(BASE_URL + `/get-instance/${instanceId}`);
         let data = await response.json();
 
         if (data.source_coordinates && data.destination_coordinates) {
@@ -165,10 +167,10 @@ async function setParameters() {
         return;
     }
 
-    let weatherResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
+    let weatherResponse = await fetch(BASE_URL + `/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
     let weatherJsonData = await weatherResponse.json();
 
-    let airPollutionResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
+    let airPollutionResponse = await fetch(BASE_URL + `/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
     let airPollutionJsonData = await airPollutionResponse.json();
 
     await drawPlotlyChart("weather", weatherJsonData, weatherParameter);
