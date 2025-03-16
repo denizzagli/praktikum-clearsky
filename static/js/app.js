@@ -39,6 +39,7 @@ function initApp() {
         if (instanceId) {
             fetchDatasForMaps(instanceId);
             setParameters()
+            startSSE(instanceId);
         }
     }
 }
@@ -204,4 +205,24 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
     };
 
     Plotly.newPlot(dataType + "-chart", [trace1, trace2], layout);
+}
+
+function startSSE(instanceId) {
+    const eventSource = new EventSource(window.CONFIG.BASE_URL + `/sse/${instanceId}`);
+
+    eventSource.onmessage = function (event) {
+        try {
+            const data = JSON.parse(event.data);
+            console.log("SSE Update:", data);
+            setParameters()
+        } catch (error) {
+            console.error("Error processing SSE message:", error);
+        }
+    };
+
+    eventSource.onerror = function () {
+        console.error("SSE connection lost. Reconnecting...");
+        eventSource.close();
+        setTimeout(() => startSSE(instanceId), 5000);
+    };
 }

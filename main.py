@@ -10,6 +10,8 @@ from fastapi import FastAPI, Request, Form, Query
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import asyncio
+from starlette.responses import StreamingResponse
 
 # FastAPI APP
 app = FastAPI()
@@ -31,6 +33,8 @@ templates = Jinja2Templates(directory="templates")
 # Storage to instance data
 instance_data = {}
 
+instance_updates = {}
+
 # Load JSON file or initialize a new data structure
 try:
     with open(DATA_FILE, "r") as file:
@@ -44,6 +48,27 @@ def save_to_json():
     json_string = json.dumps(instance_data, indent=4)
     with open(DATA_FILE, "w", encoding="utf-8") as output_file:
         output_file.write(json_string)
+
+
+@app.get("/sse/{instance_id}")
+async def sse_updates(instance_id: str):
+    async def event_stream():
+        if instance_id not in instance_updates:
+            instance_updates[instance_id] = []
+
+        while True:
+            if instance_updates[instance_id]:
+                data = instance_updates[instance_id].pop(0)
+                yield f"data: {json.dumps(data)}\n\n"
+            await asyncio.sleep(2)
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+async def send_sse_update(instance_id: str, data):
+    if instance_id not in instance_updates:
+        instance_updates[instance_id] = []
+    instance_updates[instance_id].append(data)
 
 
 # Route for the "Home" page
@@ -84,6 +109,8 @@ async def receive_post(request: Request):
 
                 # Update JSON data file
                 save_to_json()
+
+                await send_sse_update(str(json_data["instance"]), json_data)
 
             # Return the processed JSON data
             return json_data
