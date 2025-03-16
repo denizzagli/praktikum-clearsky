@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import re
@@ -10,7 +11,6 @@ from fastapi import FastAPI, Request, Form, Query
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import asyncio
 from starlette.responses import StreamingResponse
 
 # FastAPI APP
@@ -326,25 +326,38 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
     data = []
 
     if data_type == "weather":
+        sorted_source_weather_data = sort_by_time(instance["source_weather_data"])
+        sorted_destination_weather_data = sort_by_time(instance["destination_weather_data"])
+
         for i in range(len(instance["source_weather_data"])):
-            dt = instance["source_weather_data"][i]["time"]
-            source_weather_value = instance["source_weather_data"][i][parameter]
-            destination_weather_value = instance["destination_weather_data"][i][parameter]
+            dt = sorted_source_weather_data[i]["time"]
+            source_weather_value = sorted_source_weather_data[i][parameter]
 
-            data.append(
-                {"dt": dt, "source_data": source_weather_value,
-                 "destination_data": destination_weather_value})
+            if i < len(sorted_destination_weather_data):
+                destination_weather_value = sorted_destination_weather_data[i][parameter]
+
+                data.append(
+                    {"dt": dt, "source_data": source_weather_value,
+                     "destination_data": destination_weather_value})
     elif data_type == "air-pollution":
-        for i in range(len(instance["source_air_pollution_data"])):
-            dt = instance["source_air_pollution_data"][i]["time"]
-            source_air_pollution_value = instance["source_air_pollution_data"][i][parameter]
-            destination_air_pollution_value = instance["destination_air_pollution_data"][i][parameter]
+        sorted_source_air_pollution_data = sort_by_time(instance["source_air_pollution_data"])
+        sorted_destination_air_pollution_data = sort_by_time(instance["destination_air_pollution_data"])
 
-            data.append(
-                {"dt": dt, "source_data": source_air_pollution_value,
-                 "destination_data": destination_air_pollution_value})
+        for i in range(len(instance["source_air_pollution_data"])):
+            dt = sorted_source_air_pollution_data[i]["time"]
+            source_air_pollution_value = sorted_source_air_pollution_data[i][parameter]
+            destination_air_pollution_value = sorted_destination_air_pollution_data[i][parameter]
+
+            if i < len(sorted_destination_air_pollution_data):
+                data.append(
+                    {"dt": dt, "source_data": source_air_pollution_value,
+                     "destination_data": destination_air_pollution_value})
 
     return {"data": data}
+
+
+def sort_by_time(data_list):
+    return sorted(data_list, key=lambda x: x["time"])
 
 
 # Uvicorn

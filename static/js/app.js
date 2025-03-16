@@ -186,7 +186,10 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
         type: "scatter",
         mode: "lines",
         name: "Source " + parameterDict[parameter],
-        line: {color: "red"}
+        line: {
+            color: 'rgb(219, 64, 82)',
+            width: 3
+        }
     };
 
     let trace2 = {
@@ -195,7 +198,10 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
         type: "scatter",
         mode: "lines",
         name: "Destination " + parameterDict[parameter],
-        line: {color: "blue"}
+        line: {
+            color: 'rgb(55, 128, 191)',
+            width: 1
+        }
     };
 
     let layout = {
