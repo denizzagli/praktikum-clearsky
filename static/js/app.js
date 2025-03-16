@@ -1,5 +1,22 @@
 let startMap, destMap;
 
+let parameterDict = {
+    "temperature": "Temperature",
+    "precipitation": "Precipitation",
+    "humidity": "Humidity",
+    "wind_speed": "Wind Speed",
+    "aqi": "AQI",
+    "co": "CO",
+    "no": "NO",
+    "no2": "NO₂",
+    "o3": "O₃",
+    "so2": "SO₂",
+    "pm2_5": "PM2.5",
+    "pm10": "PM10",
+    "nh3": "NH₃"
+};
+
+
 fetch("/static/config.json")
     .then(response => response.json())
     .then(data => {
@@ -21,8 +38,7 @@ function initApp() {
 
         if (instanceId) {
             fetchDatasForMaps(instanceId);
-            drawEmptyChart("weather");
-            drawEmptyChart("air-pollution");
+            setParameters()
         }
     }
 }
@@ -134,8 +150,9 @@ async function fetchDatasForMaps(instanceId) {
     }
 }
 
-async function setParameters(dataType) {
-    let parameter = document.getElementById(dataType + "-parameter").value;
+async function setParameters() {
+    let weatherParameter = document.getElementById("weather-parameter").value;
+    let airPollutionParameter = document.getElementById("air-pollution-parameter").value;
 
     let pathParts = window.location.pathname.split("/");
     let instanceIdIndex = pathParts.indexOf("app") + 1;
@@ -147,10 +164,14 @@ async function setParameters(dataType) {
         return;
     }
 
-    let response = await fetch(`/get-graph-data/${instanceId}?data_type=${dataType}&parameter=${parameter}`);
-    let jsonData = await response.json();
+    let weatherResponse = await fetch(`/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
+    let weatherJsonData = await weatherResponse.json();
 
-    drawPlotlyChart(dataType, jsonData, parameter);
+    let airPollutionResponse = await fetch(`/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
+    let airPollutionJsonData = await airPollutionResponse.json();
+
+    await drawPlotlyChart("weather", weatherJsonData, weatherParameter);
+    await drawPlotlyChart("air-pollution", airPollutionJsonData, airPollutionParameter);
 }
 
 async function drawPlotlyChart(dataType, jsonData, parameter) {
@@ -163,7 +184,7 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
         y: sourceValues,
         type: "scatter",
         mode: "lines",
-        name: "Source " + parameter,
+        name: "Source " + parameterDict[parameter],
         line: {color: "red"}
     };
 
@@ -172,33 +193,15 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
         y: destinationValues,
         type: "scatter",
         mode: "lines",
-        name: "Destination " + parameter,
+        name: "Destination " + parameterDict[parameter],
         line: {color: "blue"}
     };
 
     let layout = {
-        title: parameter + " Over Time",
+        title: parameterDict[parameter] + " Over Time",
         xaxis: {title: "Time"},
         yaxis: {title: "Measurement"}
     };
 
     Plotly.newPlot(dataType + "-chart", [trace1, trace2], layout);
-}
-
-function drawEmptyChart(dataType) {
-    let layout = {
-        title: dataType + " Data",
-        xaxis: {title: "Time"},
-        yaxis: {title: "Measurement"}
-    };
-
-    let emptyData = [{
-        x: [],
-        y: [],
-        type: "scatter",
-        mode: "lines+markers",
-        name: "No Data Available"
-    }];
-
-    Plotly.newPlot(dataType + "-chart", emptyData, layout);
 }

@@ -51,7 +51,7 @@
 
             <!-- Weather Parameter Label -->
             <div class="parameter-label me-0">
-                Weather Parameter:
+                Parameters:
             </div>
 
             <!-- Weather Parameter -->
@@ -63,38 +63,6 @@
                     <option value="humidity">Humidity</option>
                     <option value="wind_speed">Wind Speed</option>
                 </select>
-            </div>
-
-            <!-- Source Set Button -->
-            <div>
-                <button onclick="setParameters('weather')" id="weather-set-parameters-button"
-                        class="btn-primary-custom">
-                    Set
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="weather-chart"></div>
-
-</div>
-
-<div class="container mt-5">
-    <h2 class="text-center text-blue-600 text-2xl font-semibold mt-4">Air Quality Parameter Visualization</h2>
-    <p class="mt-3 text-center text-gray-500 text-l">This graph represents the variations in the selected air quality
-        parameter over time for both the source and destination locations. The red line shows the air quality
-        measurements at the source, while the blue line represents the destination values. The x-axis indicates time,
-        and the y-axis reflects the measured air quality values. Air quality is a measure of the level of pollutants
-        present in the atmosphere, such as carbon monoxide (CO), nitrogen oxides (NO₂), particulate matter (PM2.5,
-        PM10), and ozone (O₃). Monitoring these values helps assess
-        environmental conditions and potential health impacts in different locations..</p>
-
-    <div id="param-description-air-pollution" class="mt-4 d-flex flex-column align-items-center">
-        <div class="d-flex align-items-center gap-3">
-
-            <!-- Air Pollution Parameter Label -->
-            <div class="parameter-label me-0">
-                Air Quality Parameter:
             </div>
 
             <!-- Air Pollution Parameter -->
@@ -115,13 +83,15 @@
 
             <!-- Source Set Button -->
             <div>
-                <button onclick="setParameters('air-pollution')" id="air-pollution-set-parameters-button"
+                <button onclick="setParameters()" id="weather-set-parameters-button"
                         class="btn-primary-custom">
                     Set
                 </button>
             </div>
         </div>
     </div>
+
+    <div id="weather-chart"></div>
 
     <div id="air-pollution-chart"></div>
 
