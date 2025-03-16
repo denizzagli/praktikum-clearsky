@@ -2,13 +2,11 @@ import json
 import os
 import re
 import time
-from typing import Dict, Set
 
 import httpx
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Form, Query
-from fastapi import WebSocket
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -46,39 +44,6 @@ def save_to_json():
     json_string = json.dumps(instance_data, indent=4)
     with open(DATA_FILE, "w", encoding="utf-8") as output_file:
         output_file.write(json_string)
-
-
-active_connections: Dict[str, Set[WebSocket]] = {}
-
-
-@app.websocket("/ws/{instance_id}")
-async def websocket_endpoint(websocket: WebSocket, instance_id: str):
-    await websocket.accept()
-
-    if instance_id not in active_connections:
-        active_connections[instance_id] = set()
-
-    active_connections[instance_id].add(websocket)
-
-    try:
-        while True:
-            await websocket.receive_text()
-    except Exception:
-        pass
-    finally:
-        active_connections[instance_id].remove(websocket)
-
-        if not active_connections[instance_id]:
-            del active_connections[instance_id]
-
-
-async def send_websocket_update(instance_id: str, data):
-    if instance_id in active_connections:
-        for connection in active_connections[instance_id].copy():
-            try:
-                await connection.send_json(data)
-            except:
-                active_connections[instance_id].remove(connection)
 
 
 # Route for the "Home" page
@@ -119,8 +84,6 @@ async def receive_post(request: Request):
 
                 # Update JSON data file
                 save_to_json()
-
-                await send_websocket_update(json_data["instance"], instance_data[str(json_data["instance"])])
 
             # Return the processed JSON data
             return json_data
