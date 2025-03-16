@@ -6,7 +6,7 @@ import time
 import httpx
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Query
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -287,6 +287,36 @@ async def get_air_quality(lat: float = Form(...),
         return JSONResponse({"error": f"HTTP error: {e.response.status_code}"}, status_code=e.response.status_code)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@app.get("/get-graph-data/{instance_id}")
+async def get_graph_data(instance_id: str, data_type: str = Query(...), weather_parameter: str = Query(...),
+                         air_pollution_parameter: str = Query(...)):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    instance = instance_data[instance_id]
+
+    data = []
+
+    if data_type == "source":
+        for i in range(len(instance["source_weather_data"])):
+            dt = instance["source_weather_data"][i]["time"]
+            weather_value = instance["source_weather_data"][i][weather_parameter]
+            air_pollution_value = instance["source_air_pollution_data"][i][air_pollution_parameter]
+
+            data.append(
+                {"dt": dt, "weather_parameter": weather_value, "air_pollution_parameter": air_pollution_value})
+    elif data_type == "destination":
+        for i in range(len(instance["destination_weather_data"])):
+            dt = instance["destination_weather_data"][i]["time"]
+            weather_value = instance["destination_weather_data"][i][weather_parameter]
+            air_pollution_value = instance["destination_air_pollution_data"][i][air_pollution_parameter]
+
+            data.append(
+                {"dt": dt, "weather_parameter": weather_value, "air_pollution_parameter": air_pollution_value})
+
+    return {"data": data}
 
 
 # Uvicorn

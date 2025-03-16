@@ -36,6 +36,115 @@
         </div>
     </div>
 
+    <div id="param-description-source" class="mt-4 d-flex flex-column align-items-center">
+        <div class="d-flex gap-4">
+
+            <!-- Source Weather Parameter Label -->
+            <div class="text-gray-700 font-medium d-flex align-items-center">
+                Weather Parameter:
+            </div>
+
+            <!-- Source Weather Parameter -->
+            <div>
+                <label id="weather-parameter-title" for="weather-parameter-source"
+                       class="text-gray-700 font-medium mb-1"
+                       style="display: none;">Weather:</label>
+                <select id="weather-parameter-source" class="border rounded px-4 py-2 w-100">
+                    <option>temperature</option>
+                    <option>precipitation</option>
+                    <option>humidity</option>
+                    <option>wind_speed</option>
+                </select>
+            </div>
+
+            <!-- Source Air Pollution Parameter Label -->
+            <div class="text-gray-700 font-medium d-flex align-items-center">
+                Air Quality Parameter:
+            </div>
+
+            <!-- Source Air Pollution Parameter -->
+            <div>
+                <label id="air-pollution-parameter-title" for="air-pollution-parameter-source"
+                       class="text-gray-700 font-medium mb-1" style="display: none;">Air Pollution:</label>
+                <select id="air-pollution-parameter-source" class="border rounded px-4 py-2 w-100">
+                    <option>aqi</option>
+                    <option>co</option>
+                    <option>no</option>
+                    <option>no2</option>
+                    <option>o3</option>
+                    <option>so2</option>
+                    <option>pm2_5</option>
+                    <option>pm10</option>
+                    <option>nh3</option>
+                </select>
+            </div>
+
+            <!-- Source Set Button -->
+            <div class="d-flex align-items-end">
+                <button onclick="setParameters('source')" id="source-set-parameters-button" class="btn-primary-custom">
+                    Set
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="weather-air-quality-chart-source"></div>
+
+    <div id="param-description-destination" class="mt-4 d-flex flex-column align-items-center">
+        <div class="d-flex gap-4">
+
+            <!-- Source Weather Parameter Label -->
+            <div class="text-gray-700 font-medium d-flex align-items-center">
+                Weather Parameter:
+            </div>
+
+            <!-- Source Weather Parameter -->
+            <div>
+                <label id="weather-parameter-title-destination" for="weather-parameter-destination"
+                       class="text-gray-700 font-medium mb-1"
+                       style="display: none;">Weather:</label>
+                <select id="weather-parameter-destination" class="border rounded px-4 py-2 w-100">
+                    <option>temperature</option>
+                    <option>precipitation</option>
+                    <option>humidity</option>
+                    <option>wind_speed</option>
+                </select>
+            </div>
+
+            <!-- Source Air Pollution Parameter Label -->
+            <div class="text-gray-700 font-medium d-flex align-items-center">
+                Air Quality Parameter:
+            </div>
+
+            <!-- Source Air Pollution Parameter -->
+            <div>
+                <label id="air-pollution-parameter-title-destination" for="air-pollution-parameter-destination"
+                       class="text-gray-700 font-medium mb-1" style="display: none;">Air Pollution:</label>
+                <select id="air-pollution-parameter-destination" class="border rounded px-4 py-2 w-100">
+                    <option>aqi</option>
+                    <option>co</option>
+                    <option>no</option>
+                    <option>no2</option>
+                    <option>o3</option>
+                    <option>so2</option>
+                    <option>pm2_5</option>
+                    <option>pm10</option>
+                    <option>nh3</option>
+                </select>
+            </div>
+
+            <!-- Source Set Button -->
+            <div class="d-flex align-items-end">
+                <button onclick="setParameters('destination')" id="destination-set-parameters-button"
+                        class="btn-primary-custom">
+                    Set
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="weather-air-quality-chart-destination"></div>
+
 </div>
 
 {% endblock %}
