@@ -346,9 +346,10 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
         for i in range(len(instance["source_air_pollution_data"])):
             dt = sorted_source_air_pollution_data[i]["time"]
             source_air_pollution_value = sorted_source_air_pollution_data[i][parameter]
-            destination_air_pollution_value = sorted_destination_air_pollution_data[i][parameter]
 
             if i < len(sorted_destination_air_pollution_data):
+                destination_air_pollution_value = sorted_destination_air_pollution_data[i][parameter]
+
                 data.append(
                     {"dt": dt, "source_data": source_air_pollution_value,
                      "destination_data": destination_air_pollution_value})
