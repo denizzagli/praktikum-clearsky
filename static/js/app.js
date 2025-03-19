@@ -27,7 +27,7 @@ fetch("/static/config.json")
 
 function initApp() {
     if (window.location.pathname === "/") {
-        setTimeout(() => fetchInstances(), 500);
+        fetchInstances()
     }
 
     let pathParts = window.location.pathname.split("/");

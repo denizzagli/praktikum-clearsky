@@ -56,16 +56,22 @@ async def sse_updates(instance_id: str):
         if instance_id not in instance_updates:
             instance_updates[instance_id] = []
 
-        while True:
-            if instance_updates[instance_id]:
-                data = instance_updates[instance_id].pop(0)
-                yield f"data: {json.dumps(data)}\n\n"
-            await asyncio.sleep(2)
+        try:
+            while True:
+                if instance_updates[instance_id]:
+                    data = instance_updates[instance_id].pop(0)
+                    yield f"data: {json.dumps(data)}\n\n"
+
+                await asyncio.sleep(2)
+        except asyncio.CancelledError:
+            print(f"Connection for {instance_id} was closed")
+
+            raise
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
-async def send_sse_update(instance_id: str, data):
+def send_sse_update(instance_id: str, data):
     if instance_id not in instance_updates:
         instance_updates[instance_id] = []
     instance_updates[instance_id].append(data)
@@ -110,7 +116,7 @@ async def receive_post(request: Request):
                 # Update JSON data file
                 save_to_json()
 
-                await send_sse_update(str(json_data["instance"]), json_data)
+                send_sse_update(str(json_data["instance"]), json_data)
 
             # Return the processed JSON data
             return json_data
@@ -166,7 +172,7 @@ async def get_all_instances():
 
 # Retrieve only active instance names
 @app.get("/get-active-instances")
-async def get_active_instances():
+def get_active_instances():
     return {"instances": list(instance_data.keys())}
 
 
