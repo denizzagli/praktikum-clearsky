@@ -411,6 +411,8 @@ async def get_weather_impaction(instance_id: str = Form(...),
     instance_data[instance_id]["source_weather_impaction"][parameter] = source_weather_impaction
     instance_data[instance_id]["destination_weather_impaction"][parameter] = destination_weather_impaction
 
+    save_to_json()
+
     return {
         "parameter": parameter,
         "source_weather_impaction": source_weather_impaction,
@@ -431,6 +433,8 @@ async def get_air_quality_risk(instance_id: str = Form(...),
 
     instance_data[instance_id]["source_air_quality_risk"][parameter] = source_air_quality_risk
     instance_data[instance_id]["destination_air_quality_risk"][parameter] = destination_air_quality_risk
+
+    save_to_json()
 
     return {
         "parameter": parameter,
