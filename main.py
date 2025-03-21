@@ -446,8 +446,8 @@ async def decision_making(instance_id: str = Form(...),
     if instance_id not in instance_data:
         return JSONResponse({"error": "Instance not found"}, status_code=404)
 
-    source_risk_level = decision_making.compute_decision_making(source_risk_score)
-    destination_risk_level = decision_making.compute_decision_making(destination_risk_score)
+    source_risk_level = decision_maker.classify_total_risk(source_risk_score)
+    destination_risk_level = decision_maker.classify_total_risk(destination_risk_score)
     decision = decision_maker.make_decision(source_risk_level, destination_risk_level)
 
     result = {
