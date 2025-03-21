@@ -236,11 +236,12 @@ function startSSE(instanceId) {
 
 async function fetchImpactData(instanceId) {
     try {
-        const response = await fetch(`/get-impact-and-risk-data/${instanceId}`);
+        const response = await fetch(window.CONFIG.BASE_URL + `/get-impact-and-risk-data/${instanceId}`);
         const data = await response.json();
 
         if (data.error) {
             console.error("Error:", data.error);
+
             return;
         }
 
