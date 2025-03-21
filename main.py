@@ -13,6 +13,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import StreamingResponse
 
+import calculate_air_quality_risk
+import calculate_weather_impact
+import decision_maker
+
 # FastAPI APP
 app = FastAPI()
 
@@ -155,6 +159,36 @@ async def provide_process_id(instance_id: str = Form(...)):
         "destination_weather_data": [],
         "source_air_pollution_data": [],
         "destination_air_pollution_data": [],
+        "source_weather_impaction": {
+            "temperature": None,
+            "precipitation": None,
+            "humidity": None,
+            "wind_speed": None
+        },
+        "destination_weather_impaction": {
+            "temperature": None,
+            "precipitation": None,
+            "humidity": None,
+            "wind_speed": None
+        },
+        "source_air_quality_risk": {
+            "pm2_5": None,
+            "pm10": None,
+            "o3": None,
+            "no2": None,
+            "so2": None,
+            "co": None,
+            "nh3": None
+        },
+        "destination_air_quality_risk": {
+            "pm2_5": None,
+            "pm10": None,
+            "o3": None,
+            "no2": None,
+            "so2": None,
+            "co": None,
+            "nh3": None
+        },
         "created_time": int(time.time())
     }
 
@@ -361,6 +395,85 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
                      "destination_data": destination_air_pollution_value})
 
     return {"data": data}
+
+
+@app.post("/calculate-weather-impaction")
+async def get_weather_impaction(instance_id: str = Form(...),
+                                parameter: str = Form(...),
+                                source_value: float = Form(...),
+                                destination_value: float = Form(...)):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    source_weather_impaction = calculate_weather_impact.compute_individual_impaction(source_value, parameter)
+    destination_weather_impaction = calculate_weather_impact.compute_individual_impaction(destination_value, parameter)
+
+    instance_data[instance_id]["source_weather_impaction"][parameter] = source_weather_impaction
+    instance_data[instance_id]["destination_weather_impaction"][parameter] = destination_weather_impaction
+
+    return {
+        "parameter": parameter,
+        "source_weather_impaction": source_weather_impaction,
+        "destination_weather_impaction": destination_weather_impaction
+    }
+
+
+@app.post("/calculate-air-quality-risk")
+async def get_air_quality_risk(instance_id: str = Form(...),
+                               parameter: str = Form(...),
+                               source_value: float = Form(...),
+                               destination_value: float = Form(...)):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    source_air_quality_risk = calculate_air_quality_risk.compute_individual_risk(source_value, parameter)
+    destination_air_quality_risk = calculate_air_quality_risk.compute_individual_risk(destination_value, parameter)
+
+    instance_data[instance_id]["source_air_quality_risk"][parameter] = source_air_quality_risk
+    instance_data[instance_id]["destination_air_quality_risk"][parameter] = destination_air_quality_risk
+
+    return {
+        "parameter": parameter,
+        "source_air_quality_risk": source_air_quality_risk,
+        "destination_air_quality_risk": destination_air_quality_risk
+    }
+
+
+@app.post("/decision-making")
+async def decision_making(instance_id: str = Form(...),
+                          source_risk_score: float = Form(...),
+                          destination_risk_score: float = Form(...), ):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    source_risk_level = decision_making.compute_decision_making(source_risk_score)
+    destination_risk_level = decision_making.compute_decision_making(destination_risk_score)
+    decision = decision_maker.make_decision(source_risk_level, destination_risk_level)
+
+    result = {
+        "source_risk_level": source_risk_level,
+        "destination_risk_level": destination_risk_level,
+        "decision": decision
+    }
+
+    json_data = json.dumps(result, indent=4)
+
+    send_sse_update(instance_id, json_data)
+
+    return result
+
+
+@app.get("/get-impact-and-risk-data/{instance_id}")
+async def get_impact_data(instance_id: str):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    return {
+        "source_weather_impaction": instance_data[instance_id]["source_weather_impaction"],
+        "destination_weather_impaction": instance_data[instance_id]["destination_weather_impaction"],
+        "source_air_quality_risk": instance_data[instance_id]["source_air_quality_risk"],
+        "destination_air_quality_risk": instance_data[instance_id]["destination_air_quality_risk"]
+    }
 
 
 def sort_by_time(data_list):

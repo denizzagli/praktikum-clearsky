@@ -221,6 +221,7 @@ function startSSE(instanceId) {
             const data = JSON.parse(event.data);
             console.log("SSE Update:", data);
             setParameters()
+            fetchImpactData(instanceId)
         } catch (error) {
             console.error("Error processing SSE message:", error);
         }
@@ -231,4 +232,35 @@ function startSSE(instanceId) {
         eventSource.close();
         setTimeout(() => startSSE(instanceId), 5000);
     };
+}
+
+async function fetchImpactData(instanceId) {
+    try {
+        const response = await fetch(`/get-impact-and-risk-data/${instanceId}`);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error("Error:", data.error);
+            return;
+        }
+
+        updateTable(data.source_weather_impaction, "weather-source");
+        updateTable(data.destination_weather_impaction, "weather-destination");
+
+        updateTable(data.source_air_quality_risk, "air-source");
+        updateTable(data.destination_air_quality_risk, "air-destination");
+
+    } catch (error) {
+        console.error("Failed to fetch impact data:", error);
+    }
+}
+
+function updateTable(data, type) {
+    Object.keys(data).forEach(param => {
+        const elementId = `${type}-${param}`;
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = data[param] !== null ? data[param] : "-";
+        }
+    });
 }

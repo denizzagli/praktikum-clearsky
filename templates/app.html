@@ -46,6 +46,97 @@
         y-axis represents the measurement values of the chosen weather parameter. The visualization helps compare
         weather variations between two locations.</p>
 
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Weather Impaction Table -->
+            <div class="col-md-6">
+                <h2 class="text-center text-blue-600 text-xl font-semibold">Weather Impaction</h2>
+                <table class="table table-bordered text-center table-sm">
+                    <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Source</th>
+                        <th>Destination</th>
+                    </tr>
+                    </thead>
+                    <tbody id="weather-impaction-table">
+                    <tr>
+                        <td>Temperature</td>
+                        <td id="weather-source-temperature"></td>
+                        <td id="weather-destination-temperature"></td>
+                    </tr>
+                    <tr>
+                        <td>Precipitation</td>
+                        <td id="weather-source-precipitation"></td>
+                        <td id="weather-destination-precipitation"></td>
+                    </tr>
+                    <tr>
+                        <td>Humidity</td>
+                        <td id="weather-source-humidity"></td>
+                        <td id="weather-destination-humidity"></td>
+                    </tr>
+                    <tr>
+                        <td>Wind Speed</td>
+                        <td id="weather-source-wind_speed"></td>
+                        <td id="weather-destination-wind_speed"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Air Quality Risk Table -->
+            <div class="col-md-6">
+                <h2 class="text-center text-blue-600 text-xl font-semibold">Air Quality Risk</h2>
+                <table class="table table-bordered text-center table-sm">
+                    <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Source</th>
+                        <th>Destination</th>
+                    </tr>
+                    </thead>
+                    <tbody id="air-quality-risk-table">
+                    <tr>
+                        <td>PM2.5</td>
+                        <td id="air-source-pm2_5"></td>
+                        <td id="air-destination-pm2_5"></td>
+                    </tr>
+                    <tr>
+                        <td>PM10</td>
+                        <td id="air-source-pm10"></td>
+                        <td id="air-destination-pm10"></td>
+                    </tr>
+                    <tr>
+                        <td>O3</td>
+                        <td id="air-source-o3"></td>
+                        <td id="air-destination-o3"></td>
+                    </tr>
+                    <tr>
+                        <td>NO2</td>
+                        <td id="air-source-no2"></td>
+                        <td id="air-destination-no2"></td>
+                    </tr>
+                    <tr>
+                        <td>SO2</td>
+                        <td id="air-source-so2"></td>
+                        <td id="air-destination-so2"></td>
+                    </tr>
+                    <tr>
+                        <td>CO</td>
+                        <td id="air-source-co"></td>
+                        <td id="air-destination-co"></td>
+                    </tr>
+                    <tr>
+                        <td>NH3</td>
+                        <td id="air-source-nh3"></td>
+                        <td id="air-destination-nh3"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div id="param-description-weather" class="mt-4 d-flex flex-column align-items-center">
         <div class="d-flex align-items-center gap-3">
 
