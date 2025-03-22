@@ -406,6 +406,26 @@ async def get_score_data(instance_id: str):
     return {"data": sorted_result_data}
 
 
+@app.get("/get-current-score-data/{instance_id}")
+async def get_current_score_data(instance_id: str, date_time: int):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    instance = instance_data[instance_id]
+
+    sorted_result_data = sort_by_time(instance["result_data"])
+
+    matched = next((d for d in sorted_result_data if d["time"] == date_time), None)
+
+    if matched is None:
+        if len(sorted_result_data) > 0:
+            matched = sorted_result_data[-1]
+        else:
+            matched = "no-data"
+
+    return {"data": matched}
+
+
 def sort_by_time(data_list):
     return sorted(data_list, key=lambda x: x["time"])
 

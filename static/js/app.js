@@ -211,6 +211,110 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
         yaxis: {title: "Measurement"}
     };
 
+    if (timestamps.length > 0) {
+        let pathParts = window.location.pathname.split("/");
+        let instanceIdIndex = pathParts.indexOf("app") + 1;
+        let instanceId = pathParts[instanceIdIndex];
+
+        const lastDt = jsonData.data[jsonData.data.length - 1].dt;
+
+        let currentScoreResponse = await fetch(window.CONFIG.BASE_URL + `/get-current-score-data/${instanceId}?date_time=${lastDt}`);
+        let currentScoreJsonData = await currentScoreResponse.json();
+
+        let source_str = ""
+        let destination_str = ""
+
+        if (currentScoreJsonData.data === "no-data") {
+            source_str = "Current Total Risk Score: Not Yet Calculated"
+            destination_str = "Current Total Risk Score: Not Yet Calculated"
+        } else {
+            const source_score = currentScoreJsonData.data.source_risk_score.toFixed(3);
+            source_str = `Current Total Risk Score: ${source_score}` + "<br>" + "Current Total Risk Level: " + currentScoreJsonData.data.source_risk_level;
+
+            const destination_score = currentScoreJsonData.data.destination_risk_score.toFixed(3);
+            destination_str = `Current Total Risk Score: ${destination_score}` + "<br>" + "Current Total Risk Level: " + currentScoreJsonData.data.destination_risk_level;
+        }
+
+        layout.annotations = [
+            {
+                x: timestamps[timestamps.length - 1],
+                y: sourceValues[sourceValues.length - 1],
+                text: source_str,
+                showarrow: true,
+                arrowhead: 4,
+                ax: 0,
+                ay: -40,
+                font: {
+                    color: "rgb(219, 64, 82)",
+                    size: 12
+                },
+                bgcolor: "rgba(255,255,255,0.8)"
+            },
+            {
+                x: timestamps[timestamps.length - 1],
+                y: destinationValues[destinationValues.length - 1],
+                text: destination_str,
+                showarrow: true,
+                arrowhead: 4,
+                ax: 0,
+                ay: 40,
+                font: {
+                    color: "rgb(55, 128, 191)",
+                    size: 12
+                },
+                bgcolor: "rgba(255,255,255,0.8)"
+            }
+        ];
+
+        layout.shapes = [
+            {
+                type: 'line',
+                x0: timestamps[timestamps.length - 1],
+                x1: timestamps[timestamps.length - 1],
+                y0: destinationValues[destinationValues.length - 1],
+                y1: sourceValues[sourceValues.length - 1],
+                line: {
+                    color: '#888',
+                    width: 2,
+                    dash: 'dot'
+                }
+            }
+        ];
+
+        let decision = currentScoreJsonData.data.decision;
+        let decisionColor = "#2ca02c";
+
+        switch (decision) {
+            case "Safe":
+                decisionColor = "#2ca02c";
+                break;
+            case "Caution":
+                decisionColor = "#ff9900";
+                break;
+            case "Risky":
+                decisionColor = "#1f77b4";
+                break;
+            case "Dangerous":
+                decisionColor = "#d62728";
+                break;
+        }
+
+        layout.annotations.push({
+            xref: 'paper',
+            yref: 'paper',
+            x: 0.5,
+            y: 1.1,
+            text: `Current Decision: <b>${currentScoreJsonData.data.decision}</b>`,
+            showarrow: false,
+            font: {
+                size: 20,
+                family: "'Segoe UI', 'Helvetica Neue', sans-serif",
+                color: decisionColor
+            },
+            align: 'center'
+        });
+    }
+
     Plotly.newPlot(dataType + "-chart", [trace1, trace2], layout);
 }
 
