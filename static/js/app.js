@@ -39,6 +39,7 @@ function initApp() {
         if (instanceId) {
             fetchDatasForMaps(instanceId);
             setParameters()
+            drawScoreChart()
             startSSE(instanceId);
         }
     }
@@ -213,6 +214,57 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
     Plotly.newPlot(dataType + "-chart", [trace1, trace2], layout);
 }
 
+async function drawScoreChart() {
+    let pathParts = window.location.pathname.split("/");
+    let instanceIdIndex = pathParts.indexOf("app") + 1;
+    let instanceId = pathParts[instanceIdIndex];
+
+    if (!instanceId) {
+        console.error("Couldn't find instance id.");
+
+        return;
+    }
+
+    let scoreResponse = await fetch(window.CONFIG.BASE_URL + `/get-score-data/${instanceId}`);
+    let scoreJsonData = await scoreResponse.json();
+
+    let timestamps = scoreJsonData.data.map(d => new Date(d.dt * 1000));
+    let sourceValues = scoreJsonData.data.map(d => d["source_risk_score"]);
+    let destinationValues = scoreJsonData.data.map(d => d["destination_risk_score"]);
+
+    let trace1 = {
+        x: timestamps,
+        y: sourceValues,
+        type: "scatter",
+        mode: "lines",
+        name: "Source Risk Score",
+        line: {
+            color: 'rgb(219, 64, 82)',
+            width: 3
+        }
+    };
+
+    let trace2 = {
+        x: timestamps,
+        y: destinationValues,
+        type: "scatter",
+        mode: "lines",
+        name: "Destination Risk Score",
+        line: {
+            color: 'rgb(55, 128, 191)',
+            width: 1
+        }
+    };
+
+    let layout = {
+        title: "Risk Scores Over Time",
+        xaxis: {title: "Time"},
+        yaxis: {title: "Score"}
+    };
+
+    Plotly.newPlot("total-impaction-and-risk-score-chart", [trace1, trace2], layout);
+}
+
 function startSSE(instanceId) {
     const eventSource = new EventSource(window.CONFIG.BASE_URL + `/sse/${instanceId}`);
 
@@ -221,53 +273,16 @@ function startSSE(instanceId) {
             const data = JSON.parse(event.data);
             console.log("SSE Update:", data);
             setParameters()
-            fetchImpactData(instanceId)
+            drawScoreChart()
         } catch (error) {
             console.error("Error processing SSE message:", error);
         }
     };
 
     eventSource.onerror = function () {
-        if (document.visibilityState === "visible") {
-            console.error("SSE connection lost. Reconnecting...");
-        }
-
+        console.error("SSE connection lost. Reconnecting...");
         eventSource.close();
         setTimeout(() => startSSE(instanceId), 5000);
     };
 }
 
-async function fetchImpactData(instanceId) {
-    try {
-        const response = await fetch(window.CONFIG.BASE_URL + `/get-impact-and-risk-data/${instanceId}`);
-        const data = await response.json();
-
-        if (data.error) {
-            console.error("Error:", data.error);
-
-            return;
-        }
-
-        updateTable(data.source_weather_impaction, "weather-source");
-        updateTable(data.destination_weather_impaction, "weather-destination");
-
-        updateTable(data.source_air_quality_risk, "air-source");
-        updateTable(data.destination_air_quality_risk, "air-destination");
-
-    } catch (error) {
-        console.error("Failed to fetch impact data:", error);
-    }
-}
-
-function updateTable(data, type) {
-    Object.keys(data).forEach(param => {
-        const elementId = `${type}-${param}`;
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.textContent =
-                data[param] !== null && !isNaN(data[param])
-                    ? Number(data[param]).toFixed(3)
-                    : data[param] ?? "-";
-        }
-    });
-}
