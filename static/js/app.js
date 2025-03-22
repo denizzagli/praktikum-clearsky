@@ -228,7 +228,10 @@ function startSSE(instanceId) {
     };
 
     eventSource.onerror = function () {
-        console.error("SSE connection lost. Reconnecting...");
+        if (document.visibilityState === "visible") {
+            console.error("SSE connection lost. Reconnecting...");
+        }
+
         eventSource.close();
         setTimeout(() => startSSE(instanceId), 5000);
     };
@@ -261,7 +264,10 @@ function updateTable(data, type) {
         const elementId = `${type}-${param}`;
         const element = document.getElementById(elementId);
         if (element) {
-            element.textContent = data[param] !== null ? data[param] : "-";
+            element.textContent =
+                data[param] !== null && !isNaN(data[param])
+                    ? Number(data[param]).toFixed(3)
+                    : data[param] ?? "-";
         }
     });
 }
