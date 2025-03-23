@@ -198,6 +198,20 @@ async def app_instance(request: Request, instance_id: str):
     return templates.TemplateResponse("app.html", {"request": request, "instance_id": instance_id, "data": data})
 
 
+@app.get("/compare/{first_instance_id}/{second_instance_id}")
+async def app_instance(request: Request, first_instance_id: str, second_instance_id: str):
+    first_data = instance_data.get(first_instance_id, None)
+    second_data = instance_data.get(second_instance_id, None)
+
+    if not first_data or not second_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    return templates.TemplateResponse("compare.html", {"request": request, "first_instance_id": first_instance_id,
+                                                       "second_instance_id": second_instance_id,
+                                                       "first_data": first_data,
+                                                       "second_data": second_data})
+
+
 # Retrieve coordinates for a given city
 @app.post("/get-coordinates")
 async def get_location(instance_id: str = Form(...),

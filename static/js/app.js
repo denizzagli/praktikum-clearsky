@@ -1,4 +1,9 @@
-let startMap, destMap;
+let startMap, destMap, startMap2, destMap2;
+
+let selectedInstanceApp = null;
+
+let firstInstance = null;
+let secondInstance = null;
 
 let parameterDict = {
     "temperature": "Temperature",
@@ -27,7 +32,8 @@ fetch("/static/config.json")
 
 function initApp() {
     if (window.location.pathname === "/") {
-        fetchInstances()
+        fetchInstancesApp();
+        fetchInstancesCompare();
     }
 
     let pathParts = window.location.pathname.split("/");
@@ -37,10 +43,31 @@ function initApp() {
         let instanceId = pathParts[instanceIdIndex];
 
         if (instanceId) {
-            fetchDatasForMaps(instanceId);
-            setParameters()
-            drawScoreChart()
-            startSSE(instanceId);
+            fetchInstancesApp();
+            fetchDatasForMaps(instanceId, startMap, destMap, "start-title", "dest-title", "map-start", "map-dest");
+            setParameters("weather-parameter", "air-pollution-parameter", instanceId, "weather-chart", "air-pollution-chart");
+            drawScoreChart(instanceId, "total-impaction-and-risk-score-chart");
+            startSSE("weather-parameter", "air-pollution-parameter", instanceId, "weather-chart", "air-pollution-chart", "total-impaction-and-risk-score-chart");
+        }
+    }
+
+    if (pathParts.includes("compare")) {
+        let firstInstanceIdIndex = pathParts.indexOf("compare") + 1;
+        let secondInstanceIdIndex = pathParts.indexOf("compare") + 2;
+
+        let firstInstanceId = pathParts[firstInstanceIdIndex];
+        let secondInstanceId = pathParts[secondInstanceIdIndex];
+
+        if (firstInstanceId && secondInstanceId) {
+            fetchInstancesCompare();
+            fetchDatasForMaps(firstInstanceId, startMap, destMap, "first-start-title", "first-dest-title", "first-map-start", "first-map-dest");
+            fetchDatasForMaps(secondInstanceId, startMap2, destMap2, "second-start-title", "second-dest-title", "second-map-start", "second-map-dest");
+            setParameters("first-weather-parameter", "first-air-pollution-parameter", firstInstanceId, "first-weather-chart", "first-air-pollution-chart")
+            setParameters("second-weather-parameter", "second-air-pollution-parameter", secondInstanceId, "second-weather-chart", "second-air-pollution-chart")
+            drawScoreChart(firstInstanceId, "first-total-impaction-and-risk-score-chart")
+            drawScoreChart(secondInstanceId, "second-total-impaction-and-risk-score-chart")
+            startSSE("first-weather-parameter", "first-air-pollution-parameter", firstInstanceId, "first-weather-chart", "first-air-pollution-chart", "first-total-impaction-and-risk-score-chart")
+            startSSE("second-weather-parameter", "second-air-pollution-parameter", secondInstanceId, "second-weather-chart", "second-air-pollution-chart", "second-total-impaction-and-risk-score-chart")
         }
     }
 }
@@ -57,49 +84,51 @@ function redirectToContact() {
     window.location.href = window.CONFIG.BASE_URL + '/contact';
 }
 
-function displayMaps(startData, destData) {
-    if (!document.getElementById("map-start") || !document.getElementById("map-dest")) {
+function displayMaps(startData, destData, sourceMap, destinationMap, startTitle, destinationTitle, sourceContainer, destinationContainer) {
+    if (!document.getElementById(sourceContainer) || !document.getElementById(destinationContainer)) {
         console.error("Map container not found!");
+
         return;
     }
 
-    document.getElementById("start-title").style.display = "block";
-    document.getElementById("dest-title").style.display = "block";
+    document.getElementById(startTitle).style.display = "block";
+    document.getElementById(destinationTitle).style.display = "block";
 
-    if (!startMap) {
-        startMap = L.map('map-start').setView([startData.lat, startData.lon], 6);
+    if (!sourceMap) {
+        sourceMap = L.map(sourceContainer).setView([startData.lat, startData.lon], 6);
     } else {
-        startMap.setView([startData.lat, startData.lon], 6);
+        sourceMap.setView([startData.lat, startData.lon], 6);
     }
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(startMap);
+    }).addTo(sourceMap);
 
-    L.marker([startData.lat, startData.lon]).addTo(startMap)
+    L.marker([startData.lat, startData.lon]).addTo(sourceMap)
         .bindPopup(`<b>Starting City:</b> ${startData.name}`)
         .openPopup();
 
-    if (!destMap) {
-        destMap = L.map('map-dest').setView([destData.lat, destData.lon], 6);
+    if (!destinationMap) {
+        destinationMap = L.map(destinationContainer).setView([destData.lat, destData.lon], 6);
     } else {
-        destMap.setView([destData.lat, destData.lon], 6);
+        destinationMap.setView([destData.lat, destData.lon], 6);
     }
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(destMap);
+    }).addTo(destinationMap);
 
-    L.marker([destData.lat, destData.lon]).addTo(destMap)
+    L.marker([destData.lat, destData.lon]).addTo(destinationMap)
         .bindPopup(`<b>Destination City:</b> ${destData.name}`)
         .openPopup();
 }
 
-async function fetchInstances() {
+async function fetchInstancesApp() {
     let dropdownMenu = document.getElementById("instanceDropdown");
 
     if (!dropdownMenu) {
         console.error("Dropdown menu not found!");
+
         return;
     }
 
@@ -110,6 +139,7 @@ async function fetchInstances() {
 
     if (data.instances.length === 0) {
         dropdownMenu.innerHTML = '<li><a class="dropdown-item disabled" href="#">No active instances</a></li>';
+
         return;
     }
 
@@ -119,12 +149,23 @@ async function fetchInstances() {
         link.classList.add("dropdown-item");
         link.href = "#";
         link.textContent = `${instance}`;
-        link.onclick = () => goToInstance(instance);
+        link.onclick = () => {
+            selectedInstanceApp = instance;
+            document.getElementById("instanceDropdownButton").textContent = `Selected: ${instance}`;
+        };
         item.appendChild(link);
         dropdownMenu.appendChild(item);
     });
 }
 
+function goToSelectedInstanceApp() {
+    if (!selectedInstanceApp) {
+        alert("Please select an instance first.");
+
+        return;
+    }
+    goToInstance(selectedInstanceApp);
+}
 
 function goToInstance(instanceId) {
     if (instanceId) {
@@ -132,7 +173,72 @@ function goToInstance(instanceId) {
     }
 }
 
-async function fetchDatasForMaps(instanceId) {
+
+async function fetchInstancesCompare() {
+    let firstDropdown = document.getElementById("firstInstanceDropdown");
+    let secondDropdown = document.getElementById("secondInstanceDropdown");
+
+    if (!firstDropdown || !secondDropdown) {
+        console.error("Dropdown not found!");
+
+        return;
+    }
+
+    let response = await fetch(window.CONFIG.BASE_URL + "/get-active-instances");
+    let data = await response.json();
+
+    firstDropdown.innerHTML = "";
+    secondDropdown.innerHTML = "";
+
+    if (data.instances.length === 0) {
+        let emptyItem = '<li><a class="dropdown-item disabled" href="#">No active instances</a></li>';
+
+        firstDropdown.innerHTML = emptyItem;
+        secondDropdown.innerHTML = emptyItem;
+
+        return;
+    }
+
+    data.instances.forEach(instance => {
+        const createItem = (dropdown, buttonId, setter) => {
+            let item = document.createElement("li");
+            let link = document.createElement("a");
+
+            link.classList.add("dropdown-item");
+            link.href = "#";
+            link.textContent = `${instance}`;
+            link.onclick = () => {
+                setter(instance);
+                document.getElementById(buttonId).textContent = `Selected: ${instance}`;
+            };
+
+            item.appendChild(link);
+
+            dropdown.appendChild(item);
+        };
+
+        createItem(firstDropdown, "firstInstanceBtn", (val) => firstInstance = val);
+        createItem(secondDropdown, "secondInstanceBtn", (val) => secondInstance = val);
+    });
+}
+
+function goToCompare() {
+    if (!firstInstance || !secondInstance) {
+        alert("Please select both instances.");
+
+        return;
+    }
+
+    if (firstInstance === secondInstance) {
+        alert("Please select two different instances.");
+
+        return;
+    }
+
+    window.location.href = window.CONFIG.BASE_URL + `/compare/${firstInstance}/${secondInstance}`;
+}
+
+async function fetchDatasForMaps(instanceId, sourceMap, destinationMap, startTitle, destinationTitle, sourceContainer, destinationContainer) {
     try {
         let response = await fetch(window.CONFIG.BASE_URL + `/get-instance/${instanceId}`);
         let data = await response.json();
@@ -144,7 +250,7 @@ async function fetchDatasForMaps(instanceId) {
                     name: data.destination_name,
                     lat: data.destination_coordinates.lat,
                     lon: data.destination_coordinates.lon
-                }
+                }, sourceMap, destinationMap, startTitle, destinationTitle, sourceContainer, destinationContainer
             );
         }
     } catch (error) {
@@ -152,19 +258,9 @@ async function fetchDatasForMaps(instanceId) {
     }
 }
 
-async function setParameters() {
-    let weatherParameter = document.getElementById("weather-parameter").value;
-    let airPollutionParameter = document.getElementById("air-pollution-parameter").value;
-
-    let pathParts = window.location.pathname.split("/");
-    let instanceIdIndex = pathParts.indexOf("app") + 1;
-    let instanceId = pathParts[instanceIdIndex];
-
-    if (!instanceId) {
-        console.error("Couldn't find instance id.");
-
-        return;
-    }
+async function setParameters(weatherParameterSelectionName, airPollutionParameterSelectionName, instanceId, weatherChartName, airPollutionChartName) {
+    let weatherParameter = document.getElementById(weatherParameterSelectionName).value;
+    let airPollutionParameter = document.getElementById(airPollutionParameterSelectionName).value;
 
     let weatherResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=weather&parameter=${weatherParameter}`);
     let weatherJsonData = await weatherResponse.json();
@@ -172,11 +268,11 @@ async function setParameters() {
     let airPollutionResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
     let airPollutionJsonData = await airPollutionResponse.json();
 
-    await drawPlotlyChart("weather", weatherJsonData, weatherParameter);
-    await drawPlotlyChart("air-pollution", airPollutionJsonData, airPollutionParameter);
+    await drawPlotlyChart(weatherChartName, weatherJsonData, weatherParameter, instanceId);
+    await drawPlotlyChart(airPollutionChartName, airPollutionJsonData, airPollutionParameter, instanceId);
 }
 
-async function drawPlotlyChart(dataType, jsonData, parameter) {
+async function drawPlotlyChart(chartName, jsonData, parameter, instanceId) {
     let timestamps = jsonData.data.map(d => new Date(d.dt * 1000));
     let sourceValues = jsonData.data.map(d => d["source_data"]);
     let destinationValues = jsonData.data.map(d => d["destination_data"]);
@@ -212,10 +308,6 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
     };
 
     if (timestamps.length > 0) {
-        let pathParts = window.location.pathname.split("/");
-        let instanceIdIndex = pathParts.indexOf("app") + 1;
-        let instanceId = pathParts[instanceIdIndex];
-
         const lastDt = jsonData.data[jsonData.data.length - 1].dt;
 
         let currentScoreResponse = await fetch(window.CONFIG.BASE_URL + `/get-current-score-data/${instanceId}?date_time=${lastDt}`);
@@ -315,24 +407,14 @@ async function drawPlotlyChart(dataType, jsonData, parameter) {
         });
     }
 
-    Plotly.newPlot(dataType + "-chart", [trace1, trace2], layout);
+    Plotly.newPlot(chartName, [trace1, trace2], layout);
 }
 
-async function drawScoreChart() {
-    let pathParts = window.location.pathname.split("/");
-    let instanceIdIndex = pathParts.indexOf("app") + 1;
-    let instanceId = pathParts[instanceIdIndex];
-
-    if (!instanceId) {
-        console.error("Couldn't find instance id.");
-
-        return;
-    }
-
+async function drawScoreChart(instanceId, scoreChartName) {
     let scoreResponse = await fetch(window.CONFIG.BASE_URL + `/get-score-data/${instanceId}`);
     let scoreJsonData = await scoreResponse.json();
 
-    let timestamps = scoreJsonData.data.map(d => new Date(d.dt * 1000));
+    let timestamps = scoreJsonData.data.map(d => new Date(d.time * 1000));
     let sourceValues = scoreJsonData.data.map(d => d["source_risk_score"]);
     let destinationValues = scoreJsonData.data.map(d => d["destination_risk_score"]);
 
@@ -366,18 +448,18 @@ async function drawScoreChart() {
         yaxis: {title: "Score"}
     };
 
-    Plotly.newPlot("total-impaction-and-risk-score-chart", [trace1, trace2], layout);
+    Plotly.newPlot(scoreChartName, [trace1, trace2], layout);
 }
 
-function startSSE(instanceId) {
+function startSSE(weatherParameterSelectionName, airPollutionParameterSelectionName, instanceId, weatherChartName, airPollutionChartName, scoreChartName) {
     const eventSource = new EventSource(window.CONFIG.BASE_URL + `/sse/${instanceId}`);
 
     eventSource.onmessage = function (event) {
         try {
             const data = JSON.parse(event.data);
             console.log("SSE Update:", data);
-            setParameters()
-            drawScoreChart()
+            setParameters(weatherParameterSelectionName, airPollutionParameterSelectionName, instanceId, weatherChartName, airPollutionChartName)
+            drawScoreChart(instanceId, scoreChartName)
         } catch (error) {
             console.error("Error processing SSE message:", error);
         }
@@ -386,7 +468,7 @@ function startSSE(instanceId) {
     eventSource.onerror = function () {
         console.error("SSE connection lost. Reconnecting...");
         eventSource.close();
-        setTimeout(() => startSSE(instanceId), 5000);
+        setTimeout(() => startSSE(weatherParameterSelectionName, airPollutionParameterSelectionName, instanceId, weatherChartName, airPollutionChartName, scoreChartName), 5000);
     };
 }
 

@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}{{ first_instance_id }} - {{ second_instance_id }} - ClearSky{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center text-blue-600 text-4xl font-bold">ClearSky</h1>
+<p class="text-center text-gray-500 italic text-xl mt-2">
+    Real-Time Weather and Air Quality Visualization
+</p>
+
+<div style="display: flex; justify-content: center; gap: 2rem; text-align: center;">
+    <p class="instance-id">Instance ID: <strong>{{ first_instance_id }}</strong></p>
+    <p class="instance-id">Instance ID: <strong>{{ second_instance_id }}</strong></p>
+</div>
+
+<div class="text-center" style="margin-top: 1rem;">
+    <div style="margin-top: 1rem;">
+        <p style="font-size: 1.1rem; color: #555;">Select two other available instances to compare their data side by
+            side.</p>
+
+        <!-- Select Instances Part Compare-->
+        <div class="instance-container" style="display: flex; align-items: center; gap: 1rem;">
+            <label class="instances-label">Instances:</label>
+
+            <!-- First Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="firstInstanceBtn"
+                        style="min-width: 180px;"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Select Instance
+                </button>
+                <ul class="dropdown-menu" id="firstInstanceDropdown">
+                    <li><a class="dropdown-item disabled" href="#">No active instances</a></li>
+                </ul>
+            </div>
+
+            <!-- Second Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="secondInstanceBtn"
+                        style="min-width: 180px;"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Select Instance
+                </button>
+                <ul class="dropdown-menu" id="secondInstanceDropdown">
+                    <li><a class="dropdown-item disabled" href="#">No active instances</a></li>
+                </ul>
+            </div>
+
+            <button onclick="goToCompare()" class="btn-primary-custom">Go To Instances</button>
+            <button onclick="fetchInstancesCompare()" class="btn-primary-custom">Refresh</button>
+        </div>
+    </div>
+</div>
+
+<!-- Show Locations -->
+<div class="container mt-5">
+    <h2 class="text-center text-blue-600 text-2xl font-semibold mt-4">City Geocoding</h2>
+    <div class="text-center" style="max-width: 800px; margin: 2rem auto;">
+        <p style="color: #555; font-size: 1rem; line-height: 1.6;">
+            The starting and destination locations selected during the process
+            model configuration are visualized on the map below for the corresponding instances.
+        </p>
+    </div>
+
+    <div class="mt-4 row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Map Results -->
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <h5 id="first-start-title" class="map-title" style="display: none;">Starting Location - {{
+                        first_instance_id }}</h5>
+                    <div id="first-start-result" class="alert alert-info" style="display: none;"></div>
+                    <div id="first-map-start" style="height: 300px; width: 100%;"></div>
+                </div>
+                <div class="col-md-6">
+                    <h5 id="first-dest-title" class="map-title" style="display: none;">Destination Location - {{
+                        first_instance_id }}</h5>
+                    <div id="first-end-result" class="alert alert-info" style="display: none;"></div>
+                    <div id="first-map-dest" style="height: 300px; width: 100%;"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-4 row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Map Results -->
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <h5 id="second-start-title" class="map-title" style="display: none;">Starting Location - {{
+                        second_instance_id }}</h5>
+                    <div id="second-start-result" class="alert alert-info" style="display: none;"></div>
+                    <div id="second-map-start" style="height: 300px; width: 100%;"></div>
+                </div>
+                <div class="col-md-6">
+                    <h5 id="second-dest-title" class="map-title" style="display: none;">Destination Location - {{
+                        second_instance_id }}</h5>
+                    <div id="second-end-result" class="alert alert-info" style="display: none;"></div>
+                    <div id="second-map-dest" style="height: 300px; width: 100%;"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Visualization -->
+<div class="container mt-5">
+    <h2 class="text-center text-blue-600 text-2xl font-semibold mt-4">Weather Parameter Visualization</h2>
+    <div class="text-center" style="max-width: 800px; margin: 2rem auto;">
+        <p style="color: #555; font-size: 1rem; line-height: 1.6;">
+            These charts visualize the selected weather and air quality parameters over time for both the source and
+            destination locations.
+            The <strong>x-axis</strong> represents the time, while the <strong>y-axis</strong> shows the measurement
+            values of the selected parameter.
+            The data shown in the charts is updated in real-time, reflecting the most recent environmental conditions.
+        </p>
+        <br>
+        <p style="color: #555; font-size: 1rem; line-height: 1.6;">
+            In each chart, the <span style="color: red; font-weight: 600;">red line</span> corresponds to the source
+            location, and the <span style="color: #337ab7; font-weight: 600;">blue line</span> to the destination.
+            At the most recent point in time, each line displays the <strong>current total risk score</strong>
+            calculated by the process model, along with the associated <strong>risk level</strong> (such as “Medium
+            Risk” or “High Risk”).
+        </p>
+        <br>
+        <p style="color: #555; font-size: 1rem; line-height: 1.6;">
+            Above each chart, a <strong>Current Decision</strong> label summarizes the overall safety status of the
+            journey based on the evaluated conditions.
+            This dual-parameter visualization helps assess how changes in both <strong>weather</strong> and <strong>air
+            quality</strong> may impact the safety of travel between the selected locations.
+        </p>
+    </div>
+
+    <div id="first-param-description-weather" class="mt-4 d-flex flex-column align-items-center">
+        <div class="d-flex align-items-center gap-3">
+
+            <!-- Weather Parameter Label -->
+            <div class="parameter-label me-0">
+                Parameters - {{ first_instance_id }}:
+            </div>
+
+            <!-- Weather Parameter -->
+            <div class="me-2">
+                <select id="first-weather-parameter" class="border rounded px-4 py-2 w-100"
+                        aria-label="Select Weather Parameter">
+                    <option value="temperature">Temperature</option>
+                    <option value="precipitation">Precipitation</option>
+                    <option value="humidity">Humidity</option>
+                    <option value="wind_speed">Wind Speed</option>
+                </select>
+            </div>
+
+            <!-- Air Pollution Parameter -->
+            <div class="me-2">
+                <select id="first-air-pollution-parameter" class="border rounded px-4 py-2 w-100"
+                        aria-label="Select Air Quality Parameter">
+                    <option value="aqi">AQI</option>
+                    <option value="co">CO</option>
+                    <option value="no">NO</option>
+                    <option value="no2">NO₂</option>
+                    <option value="o3">O₃</option>
+                    <option value="so2">SO₂</option>
+                    <option value="pm2_5">PM2.5</option>
+                    <option value="pm10">PM10</option>
+                    <option value="nh3">NH₃</option>
+                </select>
+            </div>
+
+            <!-- Source Set Button -->
+            <div>
+                <button onclick="setParameters('first-weather-parameter', 'first-air-pollution-parameter', '{{ first_instance_id }}', 'first-weather-chart', 'first-air-pollution-chart')"
+                        id="first-weather-set-parameters-button"
+                        class="btn-primary-custom">
+                    Set
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="second-param-description-weather" class="mt-4 d-flex flex-column align-items-center">
+        <div class="d-flex align-items-center gap-3">
+
+            <!-- Weather Parameter Label -->
+            <div class="parameter-label me-0">
+                Parameters - {{ second_instance_id }}:
+            </div>
+
+            <!-- Weather Parameter -->
+            <div class="me-2">
+                <select id="second-weather-parameter" class="border rounded px-4 py-2 w-100"
+                        aria-label="Select Weather Parameter">
+                    <option value="temperature">Temperature</option>
+                    <option value="precipitation">Precipitation</option>
+                    <option value="humidity">Humidity</option>
+                    <option value="wind_speed">Wind Speed</option>
+                </select>
+            </div>
+
+            <!-- Air Pollution Parameter -->
+            <div class="me-2">
+                <select id="second-air-pollution-parameter" class="border rounded px-4 py-2 w-100"
+                        aria-label="Select Air Quality Parameter">
+                    <option value="aqi">AQI</option>
+                    <option value="co">CO</option>
+                    <option value="no">NO</option>
+                    <option value="no2">NO₂</option>
+                    <option value="o3">O₃</option>
+                    <option value="so2">SO₂</option>
+                    <option value="pm2_5">PM2.5</option>
+                    <option value="pm10">PM10</option>
+                    <option value="nh3">NH₃</option>
+                </select>
+            </div>
+
+            <!-- Source Set Button -->
+            <div>
+                <button onclick="setParameters('second-weather-parameter', 'second-air-pollution-parameter', '{{ second_instance_id }}', 'second-weather-chart', 'second-air-pollution-chart')"
+                        id="second-weather-set-parameters-button"
+                        class="btn-primary-custom">
+                    Set
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div style="margin-top: 4rem;">
+        <h4 style="text-align: center; color: #1e3a8a; font-size: 1.4rem; font-weight: 600;">
+            Weather Data Visualization - {{ first_instance_id }}
+        </h4>
+        <div id="first-weather-chart"></div>
+    </div>
+
+    <div style="margin-top: 4rem;">
+        <h4 style="text-align: center; color: #1e3a8a; font-size: 1.4rem; font-weight: 600;">
+            Weather Data Visualization - {{ second_instance_id }}
+        </h4>
+        <div id="second-weather-chart"></div>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <h4 style="text-align: center; color: #1e3a8a; font-size: 1.4rem; font-weight: 600;">
+            Air Quality Data Visualization - {{ first_instance_id }}
+        </h4>
+        <div id="first-air-pollution-chart"></div>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <h4 style="text-align: center; color: #1e3a8a; font-size: 1.4rem; font-weight: 600;">
+            Air Quality Data Visualization - {{ second_instance_id }}
+        </h4>
+        <div id="second-air-pollution-chart"></div>
+    </div>
+
+    <div class="container mt-5">
+        <h2 class="text-center text-blue-600 text-2xl font-semibold mt-4">Total Risk Score Data Visualization</h2>
+
+        <div class="text-center" style="max-width: 800px; margin: 2rem auto;">
+            <p style="color: #555; font-size: 1rem; line-height: 1.6;">
+                <strong>These charts show the total risk scores over time for both the source and destination
+                    locations.</strong><br>
+                Each line represents the real-time calculated risk score based on the environmental conditions (e.g.,
+                weather and air quality) at the respective location.
+            </p>
+            <p style="color: #555; font-size: 1rem; line-height: 1.6;">
+                The <span style="color: red; font-weight: 600;">red line</span> indicates the total risk score at the
+                source, while the
+                <span style="color: #337ab7; font-weight: 600;">blue line</span> represents the score at the
+                destination.
+                These scores are generated using the process models, which evaluates multiple parameters to determine the
+                potential risk level at any given moment.
+            </p>
+            <p style="color: #555; font-size: 1rem; line-height: 1.6;">
+                These charts help monitor how the safety level of both locations changes over time, offering valuable
+                insights for decision-making during the journey planning processes.
+            </p>
+        </div>
+
+        <div style="margin-top: 4rem;">
+            <h4 style="text-align: center; color: #1e3a8a; font-size: 1.4rem; font-weight: 600; margin-bottom: 0.2rem;">
+                Risk Score Data Visualization - {{ first_instance_id }}
+            </h4>
+            <div id="first-total-impaction-and-risk-score-chart"></div>
+        </div>
+
+        <div style="margin-top: 4rem;">
+            <h4 style="text-align: center; color: #1e3a8a; font-size: 1.4rem; font-weight: 600; margin-bottom: 0.2rem;">
+                Risk Score Data Visualization - {{ second_instance_id }}
+            </h4>
+            <div id="second-total-impaction-and-risk-score-chart"></div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

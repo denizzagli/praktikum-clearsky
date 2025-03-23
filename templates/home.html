@@ -9,22 +9,74 @@
     Real-Time Weather and Air Quality Visualization
 </p>
 
-<p class="mt-3 text-center text-gray-500 text-l">The instances you have started are listed below. To see the newly
-    created instance, you can refresh the page or use the refresh button.</p>
+<div class="text-center" style="margin-top: 2rem;">
+    <p style="font-size: 1.1rem; color: #555;">
+        Explore and compare real-time weather and air quality data from single or multiple instances.
+    </p>
 
-<!-- Select Instance Part -->
-<div class="instance-container">
-    <label for="instanceDropdown" class="instances-label">Instances:</label>
-    <div class="dropdown text-center">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="instanceDropdownButton"
-                data-bs-toggle="dropdown" aria-expanded="false">
-            Select Instance
-        </button>
-        <ul class="dropdown-menu" id="instanceDropdown">
-            <li><a class="dropdown-item disabled" href="#">No active instances</a></li>
-        </ul>
+    <div style="margin-top: 2.5rem;">
+        <h2 class="text-center text-blue-600 text-2xl font-semibold mt-4" style="margin-bottom: 0.5rem;">Single Instance Analysis</h2>
+        <p style="color: #666;">Select an instance and click <strong>"Go To Instance"</strong> to view its real-time
+            data.</p>
+
+        <!-- Select Instance Part App-->
+        <div class="instance-container" style="display: flex; align-items: center; gap: 1rem;">
+            <label for="instanceDropdown" class="instances-label">Instances:</label>
+
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="instanceDropdownButton"
+                        style="min-width: 180px;"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Select Instance
+                </button>
+                <ul class="dropdown-menu" id="instanceDropdown">
+                    <li><a class="dropdown-item disabled" href="#">No active instances</a></li>
+                </ul>
+            </div>
+
+            <button onclick="goToSelectedInstanceApp()" class="btn-primary-custom">Go To Instance</button>
+            <button onclick="fetchInstancesApp()" class="btn-primary-custom">Refresh</button>
+        </div>
     </div>
-    <button onclick="fetchInstances()" class="btn-primary-custom">Refresh</button>
+
+    <div style="margin-top: 3rem;">
+        <h2 class="text-center text-blue-600 text-2xl font-semibold mt-4" style="margin-bottom: 0.5rem;">Compare Two Instances</h2>
+        <p style="color: #666;">
+            Select two different instances and click <strong>"Go To Instances"</strong> to compare them side by side.
+        </p>
+
+        <!-- Select Instances Part Compare-->
+        <div class="instance-container" style="display: flex; align-items: center; gap: 1rem;">
+            <label class="instances-label">Instances:</label>
+
+            <!-- First Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="firstInstanceBtn"
+                        style="min-width: 180px;"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Select Instance
+                </button>
+                <ul class="dropdown-menu" id="firstInstanceDropdown">
+                    <li><a class="dropdown-item disabled" href="#">No active instances</a></li>
+                </ul>
+            </div>
+
+            <!-- Second Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="secondInstanceBtn"
+                        style="min-width: 180px;"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Select Instance
+                </button>
+                <ul class="dropdown-menu" id="secondInstanceDropdown">
+                    <li><a class="dropdown-item disabled" href="#">No active instances</a></li>
+                </ul>
+            </div>
+
+            <button onclick="goToCompare()" class="btn-primary-custom">Go To Instances</button>
+            <button onclick="fetchInstancesCompare()" class="btn-primary-custom">Refresh</button>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
