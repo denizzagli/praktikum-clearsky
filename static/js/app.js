@@ -268,11 +268,11 @@ async function setParameters(weatherParameterSelectionName, airPollutionParamete
     let airPollutionResponse = await fetch(window.CONFIG.BASE_URL + `/get-graph-data/${instanceId}?data_type=air-pollution&parameter=${airPollutionParameter}`);
     let airPollutionJsonData = await airPollutionResponse.json();
 
-    await drawPlotlyChart(weatherChartName, weatherJsonData, weatherParameter, instanceId);
-    await drawPlotlyChart(airPollutionChartName, airPollutionJsonData, airPollutionParameter, instanceId);
+    await drawPlotlyChart(weatherChartName, weatherJsonData, weatherParameter, instanceId, "weather");
+    await drawPlotlyChart(airPollutionChartName, airPollutionJsonData, airPollutionParameter, instanceId, "air_pollution");
 }
 
-async function drawPlotlyChart(chartName, jsonData, parameter, instanceId) {
+async function drawPlotlyChart(chartName, jsonData, parameter, instanceId, chartType) {
     let timestamps = jsonData.data.map(d => new Date(d.dt * 1000));
     let sourceValues = jsonData.data.map(d => d["source_data"]);
     let destinationValues = jsonData.data.map(d => d["destination_data"]);
@@ -316,15 +316,26 @@ async function drawPlotlyChart(chartName, jsonData, parameter, instanceId) {
         let source_str = ""
         let destination_str = ""
 
-        if (currentScoreJsonData.data === "no-data") {
+        let source_weather_impaction = null
+        let destination_weather_impaction = null
+
+        if (chartType === "weather") {
+            source_weather_impaction = jsonData["data"][jsonData["data"].length - 1]["source_weather_impaction"][parameter]
+            destination_weather_impaction = jsonData["data"][jsonData["data"].length - 1]["destination_weather_impaction"][parameter]
+        } else if (chartType === "air_pollution") {
+            source_weather_impaction = jsonData["data"][jsonData["data"].length - 1]["source_air_quality_risk"][parameter]
+            destination_weather_impaction = jsonData["data"][jsonData["data"].length - 1]["destination_air_quality_risk"][parameter]
+        }
+
+        if (source_weather_impaction == null || destination_weather_impaction == null) {
             source_str = "Current Total Risk Score: Not Yet Calculated"
             destination_str = "Current Total Risk Score: Not Yet Calculated"
         } else {
-            const source_score = currentScoreJsonData.data.source_risk_score.toFixed(3);
-            source_str = `Current Total Risk Score: ${source_score}` + "<br>" + "Current Total Risk Level: " + currentScoreJsonData.data.source_risk_level;
+            const source_score = source_weather_impaction.toFixed(3);
+            source_str = parameterDict[parameter] + ` Risk Score: ${source_score}` + "<br>" + "Risk Level: " + currentScoreJsonData.data.source_risk_level;
 
-            const destination_score = currentScoreJsonData.data.destination_risk_score.toFixed(3);
-            destination_str = `Current Total Risk Score: ${destination_score}` + "<br>" + "Current Total Risk Level: " + currentScoreJsonData.data.destination_risk_level;
+            const destination_score = destination_weather_impaction.toFixed(3);
+            destination_str = parameterDict[parameter] + ` Risk Score: ${destination_score}` + "<br>" + "Risk Level: " + currentScoreJsonData.data.destination_risk_level;
         }
 
         layout.annotations = [
@@ -396,7 +407,7 @@ async function drawPlotlyChart(chartName, jsonData, parameter, instanceId) {
             yref: 'paper',
             x: 0.5,
             y: 1.1,
-            text: `Current Decision: <b>${currentScoreJsonData.data.decision}</b>`,
+            text: `Current Decision: <b>${currentScoreJsonData.data.decision}</b><br>`,
             showarrow: false,
             font: {
                 size: 20,
@@ -447,6 +458,103 @@ async function drawScoreChart(instanceId, scoreChartName) {
         xaxis: {title: "Time"},
         yaxis: {title: "Score"}
     };
+
+    if (timestamps.length > 0) {
+        let last_score_data = scoreJsonData["data"][scoreJsonData["data"].length - 1]
+
+        let source_str = ""
+        let destination_str = ""
+
+        if (last_score_data == null) {
+            source_str = "Risk Score: Not Yet Calculated"
+            destination_str = "Risk Score: Not Yet Calculated"
+        } else {
+            const source_score = last_score_data["source_risk_score"].toFixed(3);
+            source_str = `Risk Score: ${source_score}` + "<br>" + "Risk Level: " + last_score_data["source_risk_level"];
+
+            const destination_score = last_score_data["destination_risk_score"].toFixed(3);
+            destination_str = `Risk Score: ${destination_score}` + "<br>" + "Risk Level: " + last_score_data["destination_risk_level"];
+        }
+
+        layout.annotations = [
+            {
+                x: timestamps[timestamps.length - 1],
+                y: sourceValues[sourceValues.length - 1],
+                text: source_str,
+                showarrow: true,
+                arrowhead: 4,
+                ax: 0,
+                ay: -40,
+                font: {
+                    color: "rgb(219, 64, 82)",
+                    size: 12
+                },
+                bgcolor: "rgba(255,255,255,0.8)"
+            },
+            {
+                x: timestamps[timestamps.length - 1],
+                y: destinationValues[destinationValues.length - 1],
+                text: destination_str,
+                showarrow: true,
+                arrowhead: 4,
+                ax: 0,
+                ay: 40,
+                font: {
+                    color: "rgb(55, 128, 191)",
+                    size: 12
+                },
+                bgcolor: "rgba(255,255,255,0.8)"
+            }
+        ];
+
+        layout.shapes = [
+            {
+                type: 'line',
+                x0: timestamps[timestamps.length - 1],
+                x1: timestamps[timestamps.length - 1],
+                y0: destinationValues[destinationValues.length - 1],
+                y1: sourceValues[sourceValues.length - 1],
+                line: {
+                    color: '#888',
+                    width: 2,
+                    dash: 'dot'
+                }
+            }
+        ];
+
+        let decision = last_score_data["decision"];
+        let decisionColor = "#2ca02c";
+
+        switch (decision) {
+            case "Safe":
+                decisionColor = "#2ca02c";
+                break;
+            case "Caution":
+                decisionColor = "#ff9900";
+                break;
+            case "Risky":
+                decisionColor = "#1f77b4";
+                break;
+            case "Dangerous":
+                decisionColor = "#d62728";
+                break;
+        }
+
+        layout.annotations.push({
+            xref: 'paper',
+            yref: 'paper',
+            x: 0.5,
+            y: 1.1,
+            text: `Current Decision: <b>${decision}</b><br>`,
+            showarrow: false,
+            font: {
+                size: 20,
+                family: "'Segoe UI', 'Helvetica Neue', sans-serif",
+                color: decisionColor
+            },
+            align: 'center'
+        });
+    }
 
     Plotly.newPlot(scoreChartName, [trace1, trace2], layout);
 }

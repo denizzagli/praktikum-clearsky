@@ -157,6 +157,36 @@ async def provide_process_id(instance_id: str = Form(...)):
         "destination_weather_data": [],
         "source_air_pollution_data": [],
         "destination_air_pollution_data": [],
+        "source_weather_impaction": {
+            "temperature": None,
+            "precipitation": None,
+            "humidity": None,
+            "wind_speed": None
+        },
+        "destination_weather_impaction": {
+            "temperature": None,
+            "precipitation": None,
+            "humidity": None,
+            "wind_speed": None
+        },
+        "source_air_quality_risk": {
+            "pm2_5": None,
+            "pm10": None,
+            "o3": None,
+            "no2": None,
+            "so2": None,
+            "co": None,
+            "nh3": None
+        },
+        "destination_air_quality_risk": {
+            "pm2_5": None,
+            "pm10": None,
+            "o3": None,
+            "no2": None,
+            "so2": None,
+            "co": None,
+            "nh3": None
+        },
         "result_data": [],
         "created_time": int(time.time())
     }
@@ -361,7 +391,11 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
 
                 data.append(
                     {"dt": dt, "source_data": source_weather_value,
-                     "destination_data": destination_weather_value})
+                     "destination_data": destination_weather_value,
+                     "source_weather_impaction": instance["source_weather_impaction"],
+                     "destination_weather_impaction": instance["destination_weather_impaction"],
+                     "source_air_quality_risk": instance["source_air_quality_risk"],
+                     "destination_air_quality_risk": instance["destination_air_quality_risk"]})
     elif data_type == "air-pollution":
         sorted_source_air_pollution_data = sort_by_time(instance["source_air_pollution_data"])
         sorted_destination_air_pollution_data = sort_by_time(instance["destination_air_pollution_data"])
@@ -375,7 +409,11 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
 
                 data.append(
                     {"dt": dt, "source_data": source_air_pollution_value,
-                     "destination_data": destination_air_pollution_value})
+                     "destination_data": destination_air_pollution_value,
+                     "source_weather_impaction": instance["source_weather_impaction"],
+                     "destination_weather_impaction": instance["destination_weather_impaction"],
+                     "source_air_quality_risk": instance["source_air_quality_risk"],
+                     "destination_air_quality_risk": instance["destination_air_quality_risk"]})
 
     return {"data": data}
 
@@ -438,6 +476,69 @@ async def get_current_score_data(instance_id: str, date_time: int):
             matched = "no-data"
 
     return {"data": matched}
+
+
+@app.post("/set-weather-data")
+async def set_weather_data(instance_id: str = Form(...),
+                           location_type: str = Form(...),
+                           temperature: float = Form(...),
+                           precipitation: float = Form(...),
+                           humidity: float = Form(...),
+                           wind_speed: float = Form(...)):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    if location_type == "source":
+        instance_data[instance_id]["source_weather_impaction"]["temperature"] = temperature
+        instance_data[instance_id]["source_weather_impaction"]["precipitation"] = precipitation
+        instance_data[instance_id]["source_weather_impaction"]["humidity"] = humidity
+        instance_data[instance_id]["source_weather_impaction"]["wind_speed"] = wind_speed
+
+    elif location_type == "destination":
+        instance_data[instance_id]["destination_weather_impaction"]["temperature"] = temperature
+        instance_data[instance_id]["destination_weather_impaction"]["precipitation"] = precipitation
+        instance_data[instance_id]["destination_weather_impaction"]["humidity"] = humidity
+        instance_data[instance_id]["destination_weather_impaction"]["wind_speed"] = wind_speed
+
+    save_to_json()
+
+    return {"result": "Scores have been updated"}
+
+
+@app.post("/set-air-quality-data")
+async def set_weather_data(instance_id: str = Form(...),
+                           location_type: str = Form(...),
+                           pm2_5: float = Form(...),
+                           pm10: float = Form(...),
+                           o3: float = Form(...),
+                           no2: float = Form(...),
+                           so2: float = Form(...),
+                           co: float = Form(...),
+                           nh3: float = Form(...)):
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    if location_type == "source":
+        instance_data[instance_id]["source_air_quality_risk"]["pm2_5"] = pm2_5
+        instance_data[instance_id]["source_air_quality_risk"]["pm10"] = pm10
+        instance_data[instance_id]["source_air_quality_risk"]["o3"] = o3
+        instance_data[instance_id]["source_air_quality_risk"]["no2"] = no2
+        instance_data[instance_id]["source_air_quality_risk"]["so2"] = so2
+        instance_data[instance_id]["source_air_quality_risk"]["co"] = co
+        instance_data[instance_id]["source_air_quality_risk"]["nh3"] = nh3
+
+    elif location_type == "destination":
+        instance_data[instance_id]["destination_air_quality_risk"]["pm2_5"] = pm2_5
+        instance_data[instance_id]["destination_air_quality_risk"]["pm10"] = pm10
+        instance_data[instance_id]["destination_air_quality_risk"]["o3"] = o3
+        instance_data[instance_id]["destination_air_quality_risk"]["no2"] = no2
+        instance_data[instance_id]["destination_air_quality_risk"]["so2"] = so2
+        instance_data[instance_id]["destination_air_quality_risk"]["co"] = co
+        instance_data[instance_id]["destination_air_quality_risk"]["nh3"] = nh3
+
+    save_to_json()
+
+    return {"result": "Scores have been updated"}
 
 
 def sort_by_time(data_list):
