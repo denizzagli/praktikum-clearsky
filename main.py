@@ -102,16 +102,20 @@ async def receive_post(request: Request):
             # Check if the instance exists in stored data and required keys are present
             if str(json_data["instance"]) in instance_data and "content" in json_data and "changed" in json_data[
                 "content"]:
-                if json_data["content"]["changed"][0] == "source_weather_response":
+                if json_data["content"]["changed"][0] == "source_weather_response" and "error" not in \
+                        json_data["content"]["values"]["source_weather_response"]:
                     instance_data[str(json_data["instance"])]["source_weather_data"].append(
                         json_data["content"]["values"]["source_weather_response"])
-                elif json_data["content"]["changed"][0] == "source_air_pollution_response":
+                elif json_data["content"]["changed"][0] == "source_air_pollution_response" and "error" not in \
+                        json_data["content"]["values"]["source_air_pollution_response"]:
                     instance_data[str(json_data["instance"])]["source_air_pollution_data"].append(
                         json_data["content"]["values"]["source_air_pollution_response"])
-                elif json_data["content"]["changed"][0] == "destination_weather_response":
+                elif json_data["content"]["changed"][0] == "destination_weather_response" and "error" not in \
+                        json_data["content"]["values"]["destination_weather_response"]:
                     instance_data[str(json_data["instance"])]["destination_weather_data"].append(
                         json_data["content"]["values"]["destination_weather_response"])
-                elif json_data["content"]["changed"][0] == "destination_air_pollution_response":
+                elif json_data["content"]["changed"][0] == "destination_air_pollution_response" and "error" not in \
+                        json_data["content"]["values"]["destination_air_pollution_response"]:
                     instance_data[str(json_data["instance"])]["destination_air_pollution_data"].append(
                         json_data["content"]["values"]["destination_air_pollution_response"])
 
@@ -442,6 +446,8 @@ async def decision_making(instance_id: str = Form(...),
     instance_data[instance_id]["result_data"].append(result)
 
     save_to_json()
+
+    send_sse_update(instance_id, result)
 
     return result
 
