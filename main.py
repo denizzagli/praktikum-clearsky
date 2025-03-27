@@ -118,10 +118,17 @@ async def receive_post(request: Request):
                         json_data["content"]["values"]["destination_air_pollution_response"]:
                     instance_data[str(json_data["instance"])]["destination_air_pollution_data"].append(
                         json_data["content"]["values"]["destination_air_pollution_response"])
+                elif json_data["content"]["changed"][0] == "decision" and "error" not in \
+                        json_data["content"]["values"]["decision"]:
+                    instance_data[str(json_data["instance"])]["result_data"].append(
+                        json_data["content"]["values"]["decision"])
+                else:
+                    return json_data
 
                 # Update JSON data file
                 save_to_json()
 
+                # Send SSE update
                 send_sse_update(str(json_data["instance"]), json_data)
 
             # Return the processed JSON data
@@ -232,6 +239,7 @@ async def app_instance(request: Request, instance_id: str):
     return templates.TemplateResponse("app.html", {"request": request, "instance_id": instance_id, "data": data})
 
 
+# Route the compare page for two instances
 @app.get("/compare/{first_instance_id}/{second_instance_id}")
 async def app_instance(request: Request, first_instance_id: str, second_instance_id: str):
     first_data = instance_data.get(first_instance_id, None)
@@ -373,8 +381,10 @@ async def get_air_quality(lat: float = Form(...),
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+# Getting related information for graphs
 @app.get("/get-graph-data/{instance_id}")
 async def get_graph_data(instance_id: str, data_type: str = Query(...), parameter: str = Query(...)):
+    # Return 404 if instance ID not found
     if instance_id not in instance_data:
         return JSONResponse({"error": "Instance not found"}, status_code=404)
 
@@ -383,6 +393,7 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
     data = []
 
     if data_type == "weather":
+        # Sort source and destination weather data by time
         sorted_source_weather_data = sort_by_time(instance["source_weather_data"])
         sorted_destination_weather_data = sort_by_time(instance["destination_weather_data"])
 
@@ -390,9 +401,11 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
             dt = sorted_source_weather_data[i]["time"]
             source_weather_value = sorted_source_weather_data[i][parameter]
 
+            # Check if destination data exists at index i
             if i < len(sorted_destination_weather_data):
                 destination_weather_value = sorted_destination_weather_data[i][parameter]
 
+                # Append formatted weather data
                 data.append(
                     {"dt": dt, "source_data": source_weather_value,
                      "destination_data": destination_weather_value,
@@ -400,7 +413,9 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
                      "destination_weather_impaction": instance["destination_weather_impaction"],
                      "source_air_quality_risk": instance["source_air_quality_risk"],
                      "destination_air_quality_risk": instance["destination_air_quality_risk"]})
+
     elif data_type == "air-pollution":
+        # Sort air pollution data by time
         sorted_source_air_pollution_data = sort_by_time(instance["source_air_pollution_data"])
         sorted_destination_air_pollution_data = sort_by_time(instance["destination_air_pollution_data"])
 
@@ -411,6 +426,7 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
             if i < len(sorted_destination_air_pollution_data):
                 destination_air_pollution_value = sorted_destination_air_pollution_data[i][parameter]
 
+                # Append formatted air pollution data
                 data.append(
                     {"dt": dt, "source_data": source_air_pollution_value,
                      "destination_data": destination_air_pollution_value,
@@ -419,53 +435,64 @@ async def get_graph_data(instance_id: str, data_type: str = Query(...), paramete
                      "source_air_quality_risk": instance["source_air_quality_risk"],
                      "destination_air_quality_risk": instance["destination_air_quality_risk"]})
 
+    # Return data as JSON
     return {"data": data}
 
 
+# Define POST endpoint for decision-making
 @app.post("/decision-making")
 async def decision_making(instance_id: str = Form(...),
                           source_risk_score: float = Form(...),
                           destination_risk_score: float = Form(...),
-                          date_time: int = Form(...), ):
-    if instance_id not in instance_data:
-        return JSONResponse({"error": "Instance not found"}, status_code=404)
+                          date_time: int = Form(...)):
+    try:
+        # Check if instance exists
+        if instance_id not in instance_data:
+            return JSONResponse({"error": "Instance not found"}, status_code=404)
 
-    source_risk_level = decision_maker.classify_total_risk(source_risk_score)
-    destination_risk_level = decision_maker.classify_total_risk(destination_risk_score)
-    decision = decision_maker.make_decision(source_risk_level, destination_risk_level)
+        # Classify source and destination risk levels
+        source_risk_level = decision_maker.classify_total_risk(source_risk_score)
+        destination_risk_level = decision_maker.classify_total_risk(destination_risk_score)
 
-    result = {
-        "source_risk_score": source_risk_score,
-        "source_risk_level": source_risk_level,
-        "destination_risk_score": destination_risk_score,
-        "destination_risk_level": destination_risk_level,
-        "decision": decision,
-        "time": date_time
-    }
+        # Make decision based on risk levels
+        decision = decision_maker.make_decision(source_risk_level, destination_risk_level)
 
-    instance_data[instance_id]["result_data"].append(result)
+        # Return result as JSON
+        return {
+            "source_risk_score": source_risk_score,
+            "source_risk_level": source_risk_level,
+            "destination_risk_score": destination_risk_score,
+            "destination_risk_level": destination_risk_level,
+            "decision": decision,
+            "time": date_time
+        }
 
-    save_to_json()
-
-    send_sse_update(instance_id, result)
-
-    return result
+    # Handle any unexpected errors
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
+# GET endpoint to retrieve score data for a given instance ID
 @app.get("/get-score-data/{instance_id}")
 async def get_score_data(instance_id: str):
+    # Return 404 if instance ID is not found
     if instance_id not in instance_data:
         return JSONResponse({"error": "Instance not found"}, status_code=404)
 
+    # Get the instance data
     instance = instance_data[instance_id]
 
+    # Sort the result data by time
     sorted_result_data = sort_by_time(instance["result_data"])
 
+    # Return sorted result data as JSON
     return {"data": sorted_result_data}
 
 
+# GET endpoint to get the score data for a specific time
 @app.get("/get-current-score-data/{instance_id}")
 async def get_current_score_data(instance_id: str, date_time: int):
+    # Return 404 if instance ID not found
     if instance_id not in instance_data:
         return JSONResponse({"error": "Instance not found"}, status_code=404)
 
@@ -484,6 +511,7 @@ async def get_current_score_data(instance_id: str, date_time: int):
     return {"data": matched}
 
 
+# POST endpoint to update weather data for a given instance
 @app.post("/set-weather-data")
 async def set_weather_data(instance_id: str = Form(...),
                            location_type: str = Form(...),
@@ -511,6 +539,7 @@ async def set_weather_data(instance_id: str = Form(...),
     return {"result": "Scores have been updated"}
 
 
+# POST endpoint to update air pollution data for a given instance
 @app.post("/set-air-quality-data")
 async def set_weather_data(instance_id: str = Form(...),
                            location_type: str = Form(...),
