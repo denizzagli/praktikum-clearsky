@@ -332,10 +332,20 @@ async function drawPlotlyChart(chartName, jsonData, parameter, instanceId, chart
             destination_str = "Current Total Risk Score: Not Yet Calculated"
         } else {
             const source_score = source_weather_impaction.toFixed(3);
-            source_str = parameterDict[parameter] + ` Risk Score: ${source_score}` + "<br>" + "Risk Level: " + currentScoreJsonData.data.source_risk_level;
+            source_str = `Score: ${source_score}` + "<br>" + "Level: " + currentScoreJsonData.data.source_risk_level;
 
             const destination_score = destination_weather_impaction.toFixed(3);
-            destination_str = parameterDict[parameter] + ` Risk Score: ${destination_score}` + "<br>" + "Risk Level: " + currentScoreJsonData.data.destination_risk_level;
+            destination_str = `Score: ${destination_score}` + "<br>" + "Level: " + currentScoreJsonData.data.destination_risk_level;
+        }
+
+        let sourceAy = 40;
+        let destinationAy = -40;
+
+        if (sourceValues.length > 0 && destinationValues.length > 0) {
+            if (sourceValues[sourceValues.length - 1] > destinationValues[destinationValues.length - 1]) {
+                sourceAy = -40;
+                destinationAy = 40;
+            }
         }
 
         layout.annotations = [
@@ -345,8 +355,10 @@ async function drawPlotlyChart(chartName, jsonData, parameter, instanceId, chart
                 text: source_str,
                 showarrow: true,
                 arrowhead: 4,
-                ax: 0,
-                ay: -40,
+                ax: 80,
+                ay: sourceAy,
+                xanchor: "left",
+                align: "left",
                 font: {
                     color: "rgb(219, 64, 82)",
                     size: 12
@@ -359,8 +371,10 @@ async function drawPlotlyChart(chartName, jsonData, parameter, instanceId, chart
                 text: destination_str,
                 showarrow: true,
                 arrowhead: 4,
-                ax: 0,
-                ay: 40,
+                ax: 80,
+                ay: destinationAy,
+                xanchor: "left",
+                align: "left",
                 font: {
                     color: "rgb(55, 128, 191)",
                     size: 12
@@ -470,10 +484,20 @@ async function drawScoreChart(instanceId, scoreChartName) {
             destination_str = "Risk Score: Not Yet Calculated"
         } else {
             const source_score = last_score_data["source_risk_score"].toFixed(3);
-            source_str = `Risk Score: ${source_score}` + "<br>" + "Risk Level: " + last_score_data["source_risk_level"];
+            source_str = `Score: ${source_score}` + "<br>" + "Level: " + last_score_data["source_risk_level"];
 
             const destination_score = last_score_data["destination_risk_score"].toFixed(3);
-            destination_str = `Risk Score: ${destination_score}` + "<br>" + "Risk Level: " + last_score_data["destination_risk_level"];
+            destination_str = `Score: ${destination_score}` + "<br>" + "Level: " + last_score_data["destination_risk_level"];
+        }
+
+        let sourceAy = 40;
+        let destinationAy = -40;
+
+        if (sourceValues.length > 0 && destinationValues.length > 0) {
+            if (sourceValues[sourceValues.length - 1] > destinationValues[destinationValues.length - 1]) {
+                sourceAy = -40;
+                destinationAy = 40;
+            }
         }
 
         layout.annotations = [
@@ -483,8 +507,10 @@ async function drawScoreChart(instanceId, scoreChartName) {
                 text: source_str,
                 showarrow: true,
                 arrowhead: 4,
-                ax: 0,
-                ay: -40,
+                ax: 80,
+                ay: sourceAy,
+                xanchor: "left",
+                align: "left",
                 font: {
                     color: "rgb(219, 64, 82)",
                     size: 12
@@ -497,8 +523,10 @@ async function drawScoreChart(instanceId, scoreChartName) {
                 text: destination_str,
                 showarrow: true,
                 arrowhead: 4,
-                ax: 0,
-                ay: 40,
+                ax: 80,
+                ay: sourceAy,
+                xanchor: "left",
+                align: "left",
                 font: {
                     color: "rgb(55, 128, 191)",
                     size: 12
