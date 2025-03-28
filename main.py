@@ -122,38 +122,6 @@ async def receive_post(request: Request):
                         json_data["content"]["values"]["decision"]:
                     instance_data[str(json_data["instance"])]["result_data"].append(
                         json_data["content"]["values"]["decision"])
-                elif json_data["content"]["changed"][0] == "source_weather_impact_response" and "error" not in \
-                        json_data["content"]["values"]["source_weather_impact_response"]:
-                    update_fields(
-                        str(json_data["instance"]),
-                        "source_weather_impaction",
-                        ["temperature", "precipitation", "humidity", "wind_speed"],
-                        json_data["content"]["values"]["source_weather_impact_response"]
-                    )
-                elif json_data["content"]["changed"][0] == "destination_weather_impact_response" and "error" not in \
-                        json_data["content"]["values"]["destination_weather_impact_response"]:
-                    update_fields(
-                        str(json_data["instance"]),
-                        "destination_weather_impaction",
-                        ["temperature", "precipitation", "humidity", "wind_speed"],
-                        json_data["content"]["values"]["destination_weather_impact_response"]
-                    )
-                elif json_data["content"]["changed"][0] == "source_air_quality_risk_response" and "error" not in \
-                        json_data["content"]["values"]["source_air_quality_risk_response"]:
-                    update_fields(
-                        str(json_data["instance"]),
-                        "source_air_quality_risk",
-                        ["pm2_5", "pm10", "o3", "no2", "so2", "co", "nh3"],
-                        json_data["content"]["values"]["source_air_quality_risk_response"]
-                    )
-                elif json_data["content"]["changed"][0] == "destination_air_quality_risk_response" and "error" not in \
-                        json_data["content"]["values"]["destination_air_quality_risk_response"]:
-                    update_fields(
-                        str(json_data["instance"]),
-                        "destination_air_quality_risk",
-                        ["pm2_5", "pm10", "o3", "no2", "so2", "co", "nh3"],
-                        json_data["content"]["values"]["destination_air_quality_risk_response"]
-                    )
                 else:
                     return json_data
 
@@ -545,47 +513,67 @@ async def get_current_score_data(instance_id: str, date_time: int):
 
 # POST endpoint to update weather data for a given instance
 @app.post("/set-weather-data")
-async def set_weather_data(temperature: float = Form(...),
+async def set_weather_data(instance_id: str = Form(...),
+                           location_type: str = Form(...),
+                           temperature: float = Form(...),
                            precipitation: float = Form(...),
                            humidity: float = Form(...),
                            wind_speed: float = Form(...)):
-    try:
-        return {
-            "temperature": temperature,
-            "precipitation": precipitation,
-            "humidity": humidity,
-            "wind_speed": wind_speed
-        }
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
+
+    if location_type == "source":
+        instance_data[instance_id]["source_weather_impaction"]["temperature"] = temperature
+        instance_data[instance_id]["source_weather_impaction"]["precipitation"] = precipitation
+        instance_data[instance_id]["source_weather_impaction"]["humidity"] = humidity
+        instance_data[instance_id]["source_weather_impaction"]["wind_speed"] = wind_speed
+
+    elif location_type == "destination":
+        instance_data[instance_id]["destination_weather_impaction"]["temperature"] = temperature
+        instance_data[instance_id]["destination_weather_impaction"]["precipitation"] = precipitation
+        instance_data[instance_id]["destination_weather_impaction"]["humidity"] = humidity
+        instance_data[instance_id]["destination_weather_impaction"]["wind_speed"] = wind_speed
+
+    save_to_json()
+
+    return {"result": "Scores have been updated"}
 
 
 # POST endpoint to update air pollution data for a given instance
 @app.post("/set-air-quality-data")
-async def set_weather_data(pm2_5: float = Form(...),
+async def set_weather_data(instance_id: str = Form(...),
+                           location_type: str = Form(...),
+                           pm2_5: float = Form(...),
                            pm10: float = Form(...),
                            o3: float = Form(...),
                            no2: float = Form(...),
                            so2: float = Form(...),
                            co: float = Form(...),
                            nh3: float = Form(...)):
-    try:
-        return {
-            "pm2_5": pm2_5,
-            "pm10": pm10,
-            "o3": o3,
-            "no2": no2,
-            "so2": so2,
-            "co": co,
-            "nh3": nh3
-        }
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
+    if instance_id not in instance_data:
+        return JSONResponse({"error": "Instance not found"}, status_code=404)
 
+    if location_type == "source":
+        instance_data[instance_id]["source_air_quality_risk"]["pm2_5"] = pm2_5
+        instance_data[instance_id]["source_air_quality_risk"]["pm10"] = pm10
+        instance_data[instance_id]["source_air_quality_risk"]["o3"] = o3
+        instance_data[instance_id]["source_air_quality_risk"]["no2"] = no2
+        instance_data[instance_id]["source_air_quality_risk"]["so2"] = so2
+        instance_data[instance_id]["source_air_quality_risk"]["co"] = co
+        instance_data[instance_id]["source_air_quality_risk"]["nh3"] = nh3
 
-def update_fields(instance_id, target, fields, response_data):
-    for field in fields:
-        instance_data[instance_id][target][field] = response_data[field]
+    elif location_type == "destination":
+        instance_data[instance_id]["destination_air_quality_risk"]["pm2_5"] = pm2_5
+        instance_data[instance_id]["destination_air_quality_risk"]["pm10"] = pm10
+        instance_data[instance_id]["destination_air_quality_risk"]["o3"] = o3
+        instance_data[instance_id]["destination_air_quality_risk"]["no2"] = no2
+        instance_data[instance_id]["destination_air_quality_risk"]["so2"] = so2
+        instance_data[instance_id]["destination_air_quality_risk"]["co"] = co
+        instance_data[instance_id]["destination_air_quality_risk"]["nh3"] = nh3
+
+    save_to_json()
+
+    return {"result": "Scores have been updated"}
 
 
 def sort_by_time(data_list):
