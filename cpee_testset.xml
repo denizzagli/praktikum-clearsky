@@ -1,0 +1,1154 @@
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <executionhandler>ruby</executionhandler>
+  <dataelements>
+    <decision/>
+    <destination_air_pollution_response/>
+    <destination_coordinates/>
+    <destination_weather_response/>
+    <round>0</round>
+    <source_air_pollution_response/>
+    <source_coordinates/>
+    <source_weather_response/>
+    <total_source_air_quality_risk_score>-1</total_source_air_quality_risk_score>
+    <total_source_risk_score>-1</total_source_risk_score>
+    <total_source_weather_impact_score>-1</total_source_weather_impact_score>
+    <total_destination_air_quality_risk_score>-1</total_destination_air_quality_risk_score>
+    <total_destination_risk_score>-1</total_destination_risk_score>
+    <total_destination_weather_impact_score>-1</total_destination_weather_impact_score>
+    <instance_id>53479</instance_id>
+    <source_name>Munich</source_name>
+    <destination_name>Berlin</destination_name>
+    <source_air_quality_risk>{"pm2_5":0.0,"pm10":0.0,"o3":0.0,"no2":0.0,"so2":0.0,"co":0.0,"nh3":0.0,"data_get":"false"}</source_air_quality_risk>
+    <destination_air_quality_risk>{"pm2_5":0.0,"pm10":0.0,"o3":0.0,"no2":0.0,"so2":0.0,"co":0.0,"nh3":0.0,"data_get":"false"}</destination_air_quality_risk>
+    <source_weather_impact>{"temperature":0.0,"precipitation":0.0,"humidity":0.0,"wind_speed":0.0,"data_get":"false"}</source_weather_impact>
+    <destination_weather_impact>{"temperature":0.0,"precipitation":0.0,"humidity":0.0,"wind_speed":0.0,"data_get":"false"}</destination_weather_impact>
+    <weights>{"pm2_5":0.3,"pm10":0.2,"o3":0.18,"no2":0.15,"so2":0.07,"co":0.06,"nh3":0.04}</weights>
+    <thresholds>{"pm2_5":25,"pm10":45,"o3":100,"no2":25,"so2":40,"co":4000,"nh3":300}</thresholds>
+    <air_quality_weight>1.0</air_quality_weight>
+    <weather_weight>0.3</weather_weight>
+    <data_get>false</data_get>
+  </dataelements>
+  <endpoints>
+    <timeout>https://cpee.org/services/timeout.php</timeout>
+    <subprocess>https://cpee.org/flow/start/url/</subprocess>
+    <provide_instance_id>https://lehre.bpm.in.tum.de/ports/13378/provide-process-id</provide_instance_id>
+    <get_coordinates>https://lehre.bpm.in.tum.de/ports/13378/get-coordinates</get_coordinates>
+    <get_weather_data>https://lehre.bpm.in.tum.de/ports/13378/get-weather</get_weather_data>
+    <get_air_pollution_data>https://lehre.bpm.in.tum.de/ports/13378/get-air-quality</get_air_pollution_data>
+    <powernap>https://cpee.org/services/powernap.php</powernap>
+    <decision_making>https://lehre.bpm.in.tum.de/ports/13378/decision-making</decision_making>
+    <set_weather_data>https://lehre.bpm.in.tum.de/ports/13378/set-weather-data</set_weather_data>
+    <set_air_quality_data>https://lehre.bpm.in.tum.de/ports/13378/set-air-quality-data</set_air_quality_data>
+  </endpoints>
+  <attributes>
+    <guarded>none</guarded>
+    <modeltype>CPEE</modeltype>
+    <theme>extended</theme>
+    <guarded_id/>
+    <info>clear_sky_final_last</info>
+    <creator>Christine Ashcreek</creator>
+    <author>Christine Ashcreek</author>
+    <model_uuid>29fc4e40-37e8-4c74-a0f0-81e226cf77c9</model_uuid>
+    <model_version/>
+    <design_dir>Teaching.dir/Prak.dir/TUM-Prak-24-WS.dir/Deniz Zagli.dir/</design_dir>
+    <design_stage>development</design_stage>
+  </attributes>
+  <description>
+    <description xmlns="http://cpee.org/ns/description/1.0">
+      <call id="a1" endpoint="provide_instance_id">
+        <parameters>
+          <label>Provide Instace ID</label>
+          <method>:post</method>
+          <arguments>
+            <instance_id>!data.instance_id</instance_id>
+          </arguments>
+        </parameters>
+        <code>
+          <prepare/>
+          <finalize output="result"/>
+          <update output="result"/>
+          <rescue output="result"/>
+        </code>
+        <annotations>
+          <_generic/>
+          <_timing>
+            <_timing_weight/>
+            <_timing_avg/>
+            <explanations/>
+          </_timing>
+          <_shifting>
+            <_shifting_type>Duration</_shifting_type>
+          </_shifting>
+          <_context_data_analysis>
+            <probes/>
+            <ips/>
+          </_context_data_analysis>
+          <report>
+            <url/>
+          </report>
+          <_notes>
+            <_notes_general/>
+          </_notes>
+        </annotations>
+        <documentation>
+          <input/>
+          <output/>
+          <implementation>
+            <description/>
+          </implementation>
+          <code>
+            <description/>
+          </code>
+        </documentation>
+      </call>
+      <call id="a2" endpoint="get_coordinates">
+        <parameters>
+          <label>Get Source Coordinates</label>
+          <method>:post</method>
+          <arguments>
+            <instance_id>!data.instance_id</instance_id>
+            <coordinate_type>source</coordinate_type>
+            <city>!data.source_name</city>
+          </arguments>
+        </parameters>
+        <code>
+          <prepare/>
+          <finalize output="result">data.source_coordinates = result</finalize>
+          <update output="result"/>
+          <rescue output="result"/>
+        </code>
+        <annotations>
+          <_generic/>
+          <_timing>
+            <_timing_weight/>
+            <_timing_avg/>
+            <explanations/>
+          </_timing>
+          <_shifting>
+            <_shifting_type>Duration</_shifting_type>
+          </_shifting>
+          <_context_data_analysis>
+            <probes/>
+            <ips/>
+          </_context_data_analysis>
+          <report>
+            <url/>
+          </report>
+          <_notes>
+            <_notes_general/>
+          </_notes>
+        </annotations>
+        <documentation>
+          <input/>
+          <output/>
+          <implementation>
+            <description/>
+          </implementation>
+          <code>
+            <description/>
+          </code>
+        </documentation>
+      </call>
+      <call id="a3" endpoint="get_coordinates">
+        <parameters>
+          <label>Get Destination Coordinates</label>
+          <method>:post</method>
+          <arguments>
+            <instance_id>!data.instance_id</instance_id>
+            <coordinate_type>destination</coordinate_type>
+            <city>!data.destination_name</city>
+          </arguments>
+        </parameters>
+        <code>
+          <prepare/>
+          <finalize output="result">data.destination_coordinates = result</finalize>
+          <update output="result"/>
+          <rescue output="result"/>
+        </code>
+        <annotations>
+          <_generic/>
+          <_timing>
+            <_timing_weight/>
+            <_timing_avg/>
+            <explanations/>
+          </_timing>
+          <_shifting>
+            <_shifting_type>Duration</_shifting_type>
+          </_shifting>
+          <_context_data_analysis>
+            <probes/>
+            <ips/>
+          </_context_data_analysis>
+          <report>
+            <url/>
+          </report>
+          <_notes>
+            <_notes_general/>
+          </_notes>
+        </annotations>
+        <documentation>
+          <input/>
+          <output/>
+          <implementation>
+            <description/>
+          </implementation>
+          <code>
+            <description/>
+          </code>
+        </documentation>
+      </call>
+      <parallel wait="-1" cancel="last">
+        <parallel_branch>
+          <loop mode="pre_test" condition="data.data_get == false">
+            <_probability>
+              <_probability_min/>
+              <_probability_max/>
+              <_probability_avg/>
+            </_probability>
+            <call id="a31" endpoint="timeout">
+              <parameters>
+                <label>Wait first data</label>
+                <method>:post</method>
+                <arguments>
+                  <timeout>10</timeout>
+                </arguments>
+              </parameters>
+              <annotations>
+                <_generic/>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+              </documentation>
+            </call>
+          </loop>
+          <loop mode="pre_test" condition="data.round &lt; 24">
+            <_probability>
+              <_probability_min/>
+              <_probability_max/>
+              <_probability_avg/>
+            </_probability>
+            <parallel wait="-1" cancel="last">
+              <parallel_branch>
+                <choose mode="exclusive">
+                  <alternative condition="data.data_get == true">
+                    <_probability>
+                      <_probability_min/>
+                      <_probability_max/>
+                      <_probability_avg/>
+                    </_probability>
+                    <manipulate id="a17" label="Calculate Impact of Temperature">def calculate_temperature_impact(temp)
+  if temp &lt; -10 || temp &gt; 35
+    impact = 0.2
+  elsif temp &lt; 0
+    impact = 0.1 + (0 - temp) * 0.01
+  elsif temp &gt; 30
+    impact = 0.1 + (temp - 30) * 0.01
+  else
+    impact = (15 - (temp - 15).abs) * 0.01
+  end
+
+  [impact, 0.2].min.round(3)
+end
+
+data.source_weather_impact["temperature"] = calculate_temperature_impact(data.source_weather_response["temperature"])
+data.destination_weather_impact["temperature"] = calculate_temperature_impact(data.destination_weather_response["temperature"])</manipulate>
+                    <manipulate id="a18" label="Calculate Impact of Precipitation">precip = data.source_weather_response["precipitation"]
+impact = [[precip * 0.03, 0.3].min, 0.0].max
+data.source_weather_impact["precipitation"] = impact.round(3)
+
+precip = data.destination_weather_response["precipitation"]
+impact = [[precip * 0.03, 0.3].min, 0.0].max
+data.destination_weather_impact["precipitation"] = impact.round(3)</manipulate>
+                    <manipulate id="a23" label="Calculate Impact of Humidity">if data.source_weather_response["humidity"] &lt; 20
+  data.source_weather_impact["humidity"] = 0.2
+elsif data.source_weather_response["humidity"] &lt; 40
+  data.source_weather_impact["humidity"] = 0.1
+elsif data.source_weather_response["humidity"] &gt; 80
+  data.source_weather_impact["humidity"] = -0.1
+else
+  data.source_weather_impact["humidity"] = 0.0
+end
+
+if data.destination_weather_response["humidity"] &lt; 20
+  data.destination_weather_impact["humidity"] = 0.2
+elsif data.destination_weather_response["humidity"] &lt; 40
+  data.destination_weather_impact["humidity"] = 0.1
+elsif data.destination_weather_response["humidity"] &gt; 80
+  data.destination_weather_impact["humidity"] = -0.1
+else
+  data.destination_weather_impact["humidity"] = 0.0
+end</manipulate>
+                    <manipulate id="a24" label="Calculate Impact of Wind Speed">if data.source_weather_response["wind_speed"] &gt; 20
+  data.source_weather_impact["wind_speed"] = -0.2
+elsif data.source_weather_response["wind_speed"] &gt; 10
+  data.source_weather_impact["wind_speed"] = -0.1
+elsif data.source_weather_response["wind_speed"] &lt; 5
+  data.source_weather_impact["wind_speed"] = 0.1
+else
+  data.source_weather_impact["wind_speed"] = 0.0
+end
+
+if data.destination_weather_response["wind_speed"] &gt; 20
+  data.destination_weather_impact["wind_speed"] = -0.2
+elsif data.destination_weather_response["wind_speed"] &gt; 10
+  data.destination_weather_impact["wind_speed"] = -0.1
+elsif data.destination_weather_response["wind_speed"] &lt; 5
+  data.destination_weather_impact["wind_speed"] = 0.1
+else
+  data.destination_weather_impact["wind_speed"] = 0.0
+end
+
+data.source_weather_impact["data_get"] = "true"
+data.destination_weather_impact["data_get"] = "true"</manipulate>
+                    <parallel wait="-1" cancel="last">
+                      <parallel_branch>
+                        <call id="a11" endpoint="set_weather_data">
+                          <parameters>
+                            <label>Update Source Weather Impacts</label>
+                            <method>:post</method>
+                            <arguments>
+                              <instance_id>!data.instance_id</instance_id>
+                              <location_type>source</location_type>
+                              <temperature>!data.source_weather_impact["temperature"]</temperature>
+                              <precipitation>!data.source_weather_impact["precipitation"]</precipitation>
+                              <humidity>!data.source_weather_impact["humidity"]</humidity>
+                              <wind_speed>!data.source_weather_impact["wind_speed"]</wind_speed>
+                            </arguments>
+                          </parameters>
+                          <code>
+                            <prepare/>
+                            <finalize output="result"/>
+                            <update output="result"/>
+                            <rescue output="result"/>
+                          </code>
+                          <annotations>
+                            <_generic/>
+                            <_timing>
+                              <_timing_weight/>
+                              <_timing_avg/>
+                              <explanations/>
+                            </_timing>
+                            <_shifting>
+                              <_shifting_type>Duration</_shifting_type>
+                            </_shifting>
+                            <_context_data_analysis>
+                              <probes/>
+                              <ips/>
+                            </_context_data_analysis>
+                            <report>
+                              <url/>
+                            </report>
+                            <_notes>
+                              <_notes_general/>
+                            </_notes>
+                          </annotations>
+                          <documentation>
+                            <input/>
+                            <output/>
+                            <implementation>
+                              <description/>
+                            </implementation>
+                            <code>
+                              <description/>
+                            </code>
+                          </documentation>
+                        </call>
+                      </parallel_branch>
+                      <parallel_branch>
+                        <call id="a12" endpoint="set_weather_data">
+                          <parameters>
+                            <label>Update Destination Weather Impacts</label>
+                            <method>:post</method>
+                            <arguments>
+                              <instance_id>!data.instance_id</instance_id>
+                              <location_type>destination</location_type>
+                              <temperature>!data.destination_weather_impact["temperature"]</temperature>
+                              <precipitation>!data.destination_weather_impact["precipitation"]</precipitation>
+                              <humidity>!data.destination_weather_impact["humidity"]</humidity>
+                              <wind_speed>!data.destination_weather_impact["wind_speed"]</wind_speed>
+                            </arguments>
+                          </parameters>
+                          <code>
+                            <prepare/>
+                            <finalize output="result"/>
+                            <update output="result"/>
+                            <rescue output="result"/>
+                          </code>
+                          <annotations>
+                            <_generic/>
+                            <_timing>
+                              <_timing_weight/>
+                              <_timing_avg/>
+                              <explanations/>
+                            </_timing>
+                            <_shifting>
+                              <_shifting_type>Duration</_shifting_type>
+                            </_shifting>
+                            <_context_data_analysis>
+                              <probes/>
+                              <ips/>
+                            </_context_data_analysis>
+                            <report>
+                              <url/>
+                            </report>
+                            <_notes>
+                              <_notes_general/>
+                            </_notes>
+                          </annotations>
+                          <documentation>
+                            <input/>
+                            <output/>
+                            <implementation>
+                              <description/>
+                            </implementation>
+                            <code>
+                              <description/>
+                            </code>
+                          </documentation>
+                        </call>
+                      </parallel_branch>
+                    </parallel>
+                  </alternative>
+                  <otherwise/>
+                </choose>
+              </parallel_branch>
+              <parallel_branch>
+                <choose mode="exclusive">
+                  <alternative condition="data.data_get == true">
+                    <_probability>
+                      <_probability_min/>
+                      <_probability_max/>
+                      <_probability_avg/>
+                    </_probability>
+                    <manipulate id="a25" label="Calculate PM2_5 Risk">raw_value = data.source_air_pollution_response["pm2_5"]
+threshold = data.thresholds["pm2_5"]
+weight = data.weights["pm2_5"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.source_air_quality_risk["pm2_5"] = current_result.round(3)
+
+raw_value = data.destination_air_pollution_response["pm2_5"]
+threshold = data.thresholds["pm2_5"]
+weight = data.weights["pm2_5"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.destination_air_quality_risk["pm2_5"] = current_result.round(3)</manipulate>
+                    <manipulate id="a26" label="Calculate PM10 Risk">raw_value = data.source_air_pollution_response["pm10"]
+threshold = data.thresholds["pm10"]
+weight = data.weights["pm10"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.source_air_quality_risk["pm10"] = current_result.round(3)
+
+raw_value = data.destination_air_pollution_response["pm10"]
+threshold = data.thresholds["pm10"]
+weight = data.weights["pm10"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.destination_air_quality_risk["pm10"] = current_result.round(3)</manipulate>
+                    <manipulate id="a27" label="Calculate O3 Risk">raw_value = data.source_air_pollution_response["o3"]
+threshold = data.thresholds["o3"]
+weight = data.weights["o3"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.source_air_quality_risk["o3"] = current_result.round(3)
+
+raw_value = data.destination_air_pollution_response["o3"]
+threshold = data.thresholds["o3"]
+weight = data.weights["o3"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.destination_air_quality_risk["o3"] = current_result.round(3)</manipulate>
+                    <manipulate id="a28" label="Calculate NO2 Risk">raw_value = data.source_air_pollution_response["no2"]
+threshold = data.thresholds["no2"]
+weight = data.weights["no2"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.source_air_quality_risk["no2"] = current_result.round(3)
+
+raw_value = data.destination_air_pollution_response["no2"]
+threshold = data.thresholds["no2"]
+weight = data.weights["no2"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.destination_air_quality_risk["no2"] = current_result.round(3)</manipulate>
+                    <manipulate id="a29" label="Calculate SO2 Risk">raw_value = data.source_air_pollution_response["so2"]
+threshold = data.thresholds["so2"]
+weight = data.weights["so2"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.source_air_quality_risk["so2"] = current_result.round(3)
+
+raw_value = data.destination_air_pollution_response["so2"]
+threshold = data.thresholds["so2"]
+weight = data.weights["so2"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.destination_air_quality_risk["so2"] = current_result.round(3)</manipulate>
+                    <manipulate id="a30" label="Calculate CO Risk">raw_value = data.source_air_pollution_response["co"]
+threshold = data.thresholds["co"]
+weight = data.weights["co"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.source_air_quality_risk["co"] = current_result.round(3)
+
+raw_value = data.destination_air_pollution_response["co"]
+threshold = data.thresholds["co"]
+weight = data.weights["co"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.destination_air_quality_risk["co"] = current_result.round(3)</manipulate>
+                    <manipulate id="a34" label="Calculate NH3 Risk">raw_value = data.source_air_pollution_response["nh3"]
+threshold = data.thresholds["nh3"]
+weight = data.weights["nh3"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.source_air_quality_risk["nh3"] = current_result.round(3)
+
+raw_value = data.destination_air_pollution_response["nh3"]
+threshold = data.thresholds["nh3"]
+weight = data.weights["nh3"]
+normalized = [(raw_value / threshold) ** 2, 1.0].min
+current_result = weight * normalized
+data.destination_air_quality_risk["nh3"] = current_result.round(3)
+
+
+data.source_air_quality_risk["data_get"] = "true"
+data.destination_air_quality_risk["data_get"] = "true"</manipulate>
+                    <parallel wait="-1" cancel="last">
+                      <parallel_branch>
+                        <call id="a16" endpoint="set_air_quality_data">
+                          <parameters>
+                            <label>Update Source Air Quality Scores</label>
+                            <method>:post</method>
+                            <arguments>
+                              <instance_id>!data.instance_id</instance_id>
+                              <location_type>source</location_type>
+                              <pm2_5>!data.source_air_quality_risk["pm2_5"]</pm2_5>
+                              <pm10>!data.source_air_quality_risk["pm10"]</pm10>
+                              <o3>!data.source_air_quality_risk["o3"]</o3>
+                              <no2>!data.source_air_quality_risk["no2"]</no2>
+                              <so2>!data.source_air_quality_risk["so2"]</so2>
+                              <co>!data.source_air_quality_risk["co"]</co>
+                              <nh3>!data.source_air_quality_risk["nh3"]</nh3>
+                            </arguments>
+                          </parameters>
+                          <code>
+                            <prepare/>
+                            <finalize output="result"/>
+                            <update output="result"/>
+                            <rescue output="result"/>
+                          </code>
+                          <annotations>
+                            <_generic/>
+                            <_timing>
+                              <_timing_weight/>
+                              <_timing_avg/>
+                              <explanations/>
+                            </_timing>
+                            <_shifting>
+                              <_shifting_type>Duration</_shifting_type>
+                            </_shifting>
+                            <_context_data_analysis>
+                              <probes/>
+                              <ips/>
+                            </_context_data_analysis>
+                            <report>
+                              <url/>
+                            </report>
+                            <_notes>
+                              <_notes_general/>
+                            </_notes>
+                          </annotations>
+                          <documentation>
+                            <input/>
+                            <output/>
+                            <implementation>
+                              <description/>
+                            </implementation>
+                            <code>
+                              <description/>
+                            </code>
+                          </documentation>
+                        </call>
+                      </parallel_branch>
+                      <parallel_branch>
+                        <call id="a22" endpoint="set_air_quality_data">
+                          <parameters>
+                            <label>Update Destination Air Quality Scores</label>
+                            <method>:post</method>
+                            <arguments>
+                              <instance_id>!data.instance_id</instance_id>
+                              <location_type>destination</location_type>
+                              <pm2_5>!data.destination_air_quality_risk["pm2_5"]</pm2_5>
+                              <pm10>!data.destination_air_quality_risk["pm10"]</pm10>
+                              <o3>!data.destination_air_quality_risk["o3"]</o3>
+                              <no2>!data.destination_air_quality_risk["no2"]</no2>
+                              <so2>!data.destination_air_quality_risk["so2"]</so2>
+                              <co>!data.destination_air_quality_risk["co"]</co>
+                              <nh3>!data.destination_air_quality_risk["nh3"]</nh3>
+                            </arguments>
+                          </parameters>
+                          <code>
+                            <prepare/>
+                            <finalize output="result"/>
+                            <update output="result"/>
+                            <rescue output="result"/>
+                          </code>
+                          <annotations>
+                            <_generic/>
+                            <_timing>
+                              <_timing_weight/>
+                              <_timing_avg/>
+                              <explanations/>
+                            </_timing>
+                            <_shifting>
+                              <_shifting_type>Duration</_shifting_type>
+                            </_shifting>
+                            <_context_data_analysis>
+                              <probes/>
+                              <ips/>
+                            </_context_data_analysis>
+                            <report>
+                              <url/>
+                            </report>
+                            <_notes>
+                              <_notes_general/>
+                            </_notes>
+                          </annotations>
+                          <documentation>
+                            <input/>
+                            <output/>
+                            <implementation>
+                              <description/>
+                            </implementation>
+                            <code>
+                              <description/>
+                            </code>
+                          </documentation>
+                        </call>
+                      </parallel_branch>
+                    </parallel>
+                  </alternative>
+                  <otherwise/>
+                </choose>
+              </parallel_branch>
+            </parallel>
+            <parallel wait="-1" cancel="last">
+              <parallel_branch>
+                <choose mode="exclusive">
+                  <alternative condition="data.source_weather_impact[&quot;data_get&quot;] == &quot;true&quot; &amp;&amp; data.destination_weather_impact[&quot;data_get&quot;] == &quot;true&quot;">
+                    <_probability>
+                      <_probability_min/>
+                      <_probability_max/>
+                      <_probability_avg/>
+                    </_probability>
+                    <manipulate id="a13" label="Calculate Total Weather Impact Score">data.total_source_weather_impact_score = data.source_weather_impact["temperature"] + data.source_weather_impact["precipitation"] + data.source_weather_impact["humidity"] + data.source_weather_impact["wind_speed"]
+data.total_destination_weather_impact_score = data.destination_weather_impact["temperature"] + data.destination_weather_impact["precipitation"] + data.destination_weather_impact["humidity"] + data.destination_weather_impact["wind_speed"]
+
+if data.total_source_weather_impact_score &lt; 0
+  data.total_source_weather_impact_score = 0
+elsif data.total_source_weather_impact_score &gt; 1
+  data.total_source_weather_impact_score = 1
+end
+
+if data.total_destination_weather_impact_score &lt; 0
+  data.total_destination_weather_impact_score = 0
+elsif data.total_destination_weather_impact_score &gt; 1
+  data.total_destination_weather_impact_score = 1
+end</manipulate>
+                  </alternative>
+                  <otherwise/>
+                </choose>
+              </parallel_branch>
+              <parallel_branch>
+                <choose mode="exclusive">
+                  <alternative condition="data.source_air_quality_risk[&quot;data_get&quot;] == &quot;true&quot; &amp;&amp; data.destination_air_quality_risk[&quot;data_get&quot;] == &quot;true&quot;">
+                    <_probability>
+                      <_probability_min/>
+                      <_probability_max/>
+                      <_probability_avg/>
+                    </_probability>
+                    <manipulate id="a14" label="Calculate Total Air Quality Risk Score">data.total_source_air_quality_risk_score = data.source_air_quality_risk["pm2_5"] + data.source_air_quality_risk["pm10"] + data.source_air_quality_risk["o3"] + data.source_air_quality_risk["no2"] + data.source_air_quality_risk["so2"] + data.source_air_quality_risk["co"] + data.source_air_quality_risk["nh3"]
+data.total_destination_air_quality_risk_score = data.destination_air_quality_risk["pm2_5"] + data.destination_air_quality_risk["pm10"] + data.destination_air_quality_risk["o3"] + data.destination_air_quality_risk["no2"] + data.destination_air_quality_risk["so2"] + data.destination_air_quality_risk["co"] + data.destination_air_quality_risk["nh3"]
+
+data.total_source_air_quality_risk_score = data.total_source_air_quality_risk_score.round(3)
+data.total_destination_air_quality_risk_score = data.total_destination_air_quality_risk_score.round(3)</manipulate>
+                  </alternative>
+                  <otherwise/>
+                </choose>
+              </parallel_branch>
+            </parallel>
+            <choose mode="exclusive">
+              <alternative condition="data.total_source_weather_impact_score != -1 &amp;&amp; data.total_destination_weather_impact_score != -1 &amp;&amp; data.total_source_air_quality_risk_score != -1 &amp;&amp; data.total_destination_air_quality_risk_score != -1">
+                <manipulate id="a15" label="Calculate Total Risk Score">data.total_source_risk_score = data.total_source_air_quality_risk_score * data.air_quality_weight + data.total_source_weather_impact_score * data.weather_weight
+data.total_destination_risk_score = data.total_destination_air_quality_risk_score * data.air_quality_weight + data.total_destination_weather_impact_score * data.weather_weight</manipulate>
+                <_probability>
+                  <_probability_min/>
+                  <_probability_max/>
+                  <_probability_avg/>
+                </_probability>
+                <choose mode="exclusive">
+                  <alternative condition="data.total_source_risk_score != -1 &amp;&amp; data.total_destination_risk_score != -1">
+                    <_probability>
+                      <_probability_min/>
+                      <_probability_max/>
+                      <_probability_avg/>
+                    </_probability>
+                    <call id="a19" endpoint="decision_making">
+                      <parameters>
+                        <label>Get Risk Infos For Travel Decision</label>
+                        <method>:post</method>
+                        <arguments>
+                          <instance_id>!data.instance_id</instance_id>
+                          <source_risk_score>!data.total_source_risk_score</source_risk_score>
+                          <destination_risk_score>!data.total_destination_risk_score</destination_risk_score>
+                          <date_time>!data.source_weather_response["time"]</date_time>
+                        </arguments>
+                      </parameters>
+                      <code>
+                        <prepare/>
+                        <finalize output="result">data.decision = result</finalize>
+                        <update output="result"/>
+                        <rescue output="result"/>
+                      </code>
+                      <annotations>
+                        <_generic/>
+                        <_timing>
+                          <_timing_weight/>
+                          <_timing_avg/>
+                          <explanations/>
+                        </_timing>
+                        <_shifting>
+                          <_shifting_type>Duration</_shifting_type>
+                        </_shifting>
+                        <_context_data_analysis>
+                          <probes>
+                            <probe>
+                              <id>decision_data</id>
+                              <source>decision_making</source>
+                              <extractor_type>extrinsic</extractor_type>
+                              <extractor_code>x = StreamPoint.new()
+x.value = result['value']
+x.timestamp = result['timestamp']
+x</extractor_code>
+                              <extractor_url/>
+                              <extractor_params/>
+                              <visualizer_url/>
+                              <visualizer_params/>
+                            </probe>
+                          </probes>
+                          <ips/>
+                        </_context_data_analysis>
+                        <report>
+                          <url/>
+                        </report>
+                        <_notes>
+                          <_notes_general/>
+                        </_notes>
+                      </annotations>
+                      <documentation>
+                        <input/>
+                        <output/>
+                        <implementation>
+                          <description/>
+                        </implementation>
+                        <code>
+                          <description/>
+                        </code>
+                      </documentation>
+                    </call>
+                  </alternative>
+                  <otherwise/>
+                </choose>
+              </alternative>
+              <otherwise/>
+            </choose>
+            <manipulate id="a21" label="Increase Round">data.round = data.round + 1</manipulate>
+            <call id="a20" endpoint="powernap">
+              <parameters>
+                <label>Wait 30 Minutes</label>
+                <method>:post</method>
+                <arguments>
+                  <timeout>30</timeout>
+                </arguments>
+              </parameters>
+              <annotations>
+                <_generic/>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+              </documentation>
+            </call>
+          </loop>
+        </parallel_branch>
+        <parallel_branch>
+          <loop mode="pre_test" condition="data.round &lt; 24">
+            <_probability>
+              <_probability_min/>
+              <_probability_max/>
+              <_probability_avg/>
+            </_probability>
+            <parallel wait="-1" cancel="last">
+              <parallel_branch>
+                <parallel wait="-1" cancel="last">
+                  <parallel_branch>
+                    <call id="a4" endpoint="get_weather_data">
+                      <parameters>
+                        <label>Get Source Weather Data</label>
+                        <method>:post</method>
+                        <arguments>
+                          <lat>!data.source_coordinates["lat"]</lat>
+                          <lon>!data.source_coordinates["lon"]</lon>
+                        </arguments>
+                      </parameters>
+                      <code>
+                        <prepare/>
+                        <finalize output="result">if !result.key?("error")
+  data.source_weather_response = result
+end</finalize>
+                        <update output="result"/>
+                        <rescue output="result"/>
+                      </code>
+                      <annotations>
+                        <_generic/>
+                        <_timing>
+                          <_timing_weight/>
+                          <_timing_avg/>
+                          <explanations/>
+                        </_timing>
+                        <_shifting>
+                          <_shifting_type>Duration</_shifting_type>
+                        </_shifting>
+                        <_context_data_analysis>
+                          <probes>
+                            <probe>
+                              <id>source_weather_data</id>
+                              <source>weather_api</source>
+                              <extractor_type>extrinsic</extractor_type>
+                              <extractor_code>x = StreamPoint.new()
+x.value = result['value']
+x.timestamp = result['timestamp']
+x</extractor_code>
+                              <extractor_url/>
+                              <extractor_params/>
+                              <visualizer_url/>
+                              <visualizer_params/>
+                            </probe>
+                          </probes>
+                          <ips/>
+                        </_context_data_analysis>
+                        <report>
+                          <url/>
+                        </report>
+                        <_notes>
+                          <_notes_general/>
+                        </_notes>
+                      </annotations>
+                      <documentation>
+                        <input/>
+                        <output/>
+                        <implementation>
+                          <description/>
+                        </implementation>
+                        <code>
+                          <description/>
+                        </code>
+                      </documentation>
+                    </call>
+                  </parallel_branch>
+                  <parallel_branch>
+                    <call id="a5" endpoint="get_weather_data">
+                      <parameters>
+                        <label>Get Destination Weather Data</label>
+                        <method>:post</method>
+                        <arguments>
+                          <lat>!data.destination_coordinates["lat"]</lat>
+                          <lon>!data.destination_coordinates["lon"]</lon>
+                        </arguments>
+                      </parameters>
+                      <code>
+                        <prepare/>
+                        <finalize output="result">if !result.key?("error")
+  data.destination_weather_response = result
+end</finalize>
+                        <update output="result"/>
+                        <rescue output="result"/>
+                      </code>
+                      <annotations>
+                        <_generic/>
+                        <_timing>
+                          <_timing_weight/>
+                          <_timing_avg/>
+                          <explanations/>
+                        </_timing>
+                        <_shifting>
+                          <_shifting_type>Duration</_shifting_type>
+                        </_shifting>
+                        <_context_data_analysis>
+                          <probes>
+                            <probe>
+                              <id>destination_weather_data</id>
+                              <source>weather_api</source>
+                              <extractor_type>extrinsic</extractor_type>
+                              <extractor_code>x = StreamPoint.new()
+x.value = result['value']
+x.timestamp = result['timestamp']
+x</extractor_code>
+                              <extractor_url/>
+                              <extractor_params/>
+                              <visualizer_url/>
+                              <visualizer_params/>
+                            </probe>
+                          </probes>
+                          <ips/>
+                        </_context_data_analysis>
+                        <report>
+                          <url/>
+                        </report>
+                        <_notes>
+                          <_notes_general/>
+                        </_notes>
+                      </annotations>
+                      <documentation>
+                        <input/>
+                        <output/>
+                        <implementation>
+                          <description/>
+                        </implementation>
+                        <code>
+                          <description/>
+                        </code>
+                      </documentation>
+                    </call>
+                  </parallel_branch>
+                </parallel>
+              </parallel_branch>
+              <parallel_branch>
+                <parallel wait="-1" cancel="last">
+                  <parallel_branch>
+                    <call id="a6" endpoint="get_air_pollution_data">
+                      <parameters>
+                        <label>Get Source Air Pollution Data</label>
+                        <method>:post</method>
+                        <arguments>
+                          <lat>!data.source_coordinates["lat"]</lat>
+                          <lon>!data.source_coordinates["lon"]</lon>
+                        </arguments>
+                      </parameters>
+                      <code>
+                        <prepare/>
+                        <finalize output="result">if !result.key?("error")
+  data.source_air_pollution_response = result
+end</finalize>
+                        <update output="result"/>
+                        <rescue output="result"/>
+                      </code>
+                      <annotations>
+                        <_generic/>
+                        <_timing>
+                          <_timing_weight/>
+                          <_timing_avg/>
+                          <explanations/>
+                        </_timing>
+                        <_shifting>
+                          <_shifting_type>Duration</_shifting_type>
+                        </_shifting>
+                        <_context_data_analysis>
+                          <probes>
+                            <probe>
+                              <id>source_air_pollution_data</id>
+                              <source>open_weather_map</source>
+                              <extractor_type>extrinsic</extractor_type>
+                              <extractor_code>x = StreamPoint.new()
+x.value = result['value']
+x.timestamp = result['timestamp']
+x</extractor_code>
+                              <extractor_url/>
+                              <extractor_params/>
+                              <visualizer_url/>
+                              <visualizer_params/>
+                            </probe>
+                          </probes>
+                          <ips/>
+                        </_context_data_analysis>
+                        <report>
+                          <url/>
+                        </report>
+                        <_notes>
+                          <_notes_general/>
+                        </_notes>
+                      </annotations>
+                      <documentation>
+                        <input/>
+                        <output/>
+                        <implementation>
+                          <description/>
+                        </implementation>
+                        <code>
+                          <description/>
+                        </code>
+                      </documentation>
+                    </call>
+                  </parallel_branch>
+                  <parallel_branch>
+                    <call id="a7" endpoint="get_air_pollution_data">
+                      <parameters>
+                        <label>Get Destination Air Pollution Data</label>
+                        <method>:post</method>
+                        <arguments>
+                          <lat>!data.destination_coordinates["lat"]</lat>
+                          <lon>!data.destination_coordinates["lon"]</lon>
+                        </arguments>
+                      </parameters>
+                      <code>
+                        <prepare/>
+                        <finalize output="result">if !result.key?("error")
+  data.destination_air_pollution_response = result
+end</finalize>
+                        <update output="result"/>
+                        <rescue output="result"/>
+                      </code>
+                      <annotations>
+                        <_generic/>
+                        <_timing>
+                          <_timing_weight/>
+                          <_timing_avg/>
+                          <explanations/>
+                        </_timing>
+                        <_shifting>
+                          <_shifting_type>Duration</_shifting_type>
+                        </_shifting>
+                        <_context_data_analysis>
+                          <probes>
+                            <probe>
+                              <id>destination_air_pollution_data</id>
+                              <source>open_weather_map</source>
+                              <extractor_type>extrinsic</extractor_type>
+                              <extractor_code>x = StreamPoint.new()
+x.value = result['value']
+x.timestamp = result['timestamp']
+x</extractor_code>
+                              <extractor_url/>
+                              <extractor_params/>
+                              <visualizer_url/>
+                              <visualizer_params/>
+                            </probe>
+                          </probes>
+                          <ips/>
+                        </_context_data_analysis>
+                        <report>
+                          <url/>
+                        </report>
+                        <_notes>
+                          <_notes_general/>
+                        </_notes>
+                      </annotations>
+                      <documentation>
+                        <input/>
+                        <output/>
+                        <implementation>
+                          <description/>
+                        </implementation>
+                        <code>
+                          <description/>
+                        </code>
+                      </documentation>
+                    </call>
+                  </parallel_branch>
+                </parallel>
+              </parallel_branch>
+            </parallel>
+            <manipulate id="a9" label="Set data_get True">data.data_get = true</manipulate>
+            <call id="a8" endpoint="powernap">
+              <parameters>
+                <label>Wait 30 Minutes</label>
+                <method>:post</method>
+                <arguments>
+                  <timeout>30</timeout>
+                </arguments>
+              </parameters>
+              <annotations>
+                <_generic/>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+              </documentation>
+            </call>
+          </loop>
+        </parallel_branch>
+      </parallel>
+    </description>
+  </description>
+  <transformation>
+    <description type="copy"/>
+    <dataelements type="none"/>
+    <endpoints type="none"/>
+  </transformation>
+</testset>
